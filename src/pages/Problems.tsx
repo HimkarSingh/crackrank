@@ -29,23 +29,23 @@ export default function Problems() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case "Easy": return "bg-success text-white";
-      case "Medium": return "bg-orange-500 text-white";
-      case "Hard": return "bg-destructive text-white";
+      case "Easy": return "bg-green-500 text-white border-green-400";
+      case "Medium": return "bg-yellow-500 text-black border-yellow-400";
+      case "Hard": return "bg-red-500 text-white border-red-400";
       default: return "bg-gray-500 text-white";
     }
   };
 
   return (
-    <div className="min-h-screen bg-secondary font-inter">
+    <div className="min-h-screen bg-black text-white font-inter">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Problems</h1>
-          <p className="text-gray-600">Practice coding problems to ace your interviews</p>
+          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">Problems</h1>
+          <p className="text-gray-300 text-lg">Practice coding problems to ace your interviews</p>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
+        <div className="bg-black/50 backdrop-blur-sm rounded-xl border border-white/20 p-6 mb-8 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="lg:col-span-2">
               <div className="relative">
@@ -54,16 +54,16 @@ export default function Problems() {
                   placeholder="Search problems..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-black/30 border-white/30 text-white placeholder-gray-400 focus:border-white/60 focus:ring-white/20"
                 />
               </div>
             </div>
             
             <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-black/30 border-white/30 text-white focus:border-white/60">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-black border-white/30">
                 <SelectItem value="all">All Difficulties</SelectItem>
                 <SelectItem value="Easy">Easy</SelectItem>
                 <SelectItem value="Medium">Medium</SelectItem>
@@ -72,10 +72,10 @@ export default function Problems() {
             </Select>
 
             <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-black/30 border-white/30 text-white focus:border-white/60">
                 <SelectValue placeholder="Company" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-black border-white/30">
                 <SelectItem value="all">All Companies</SelectItem>
                 {companies.map(company => (
                   <SelectItem key={company} value={company}>{company}</SelectItem>
@@ -84,10 +84,10 @@ export default function Problems() {
             </Select>
 
             <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-black/30 border-white/30 text-white focus:border-white/60">
                 <SelectValue placeholder="Topic" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-black border-white/30">
                 <SelectItem value="all">All Topics</SelectItem>
                 {topics.map(topic => (
                   <SelectItem key={topic} value={topic}>{topic}</SelectItem>
@@ -101,25 +101,25 @@ export default function Problems() {
         <div className="space-y-4">
           {filteredProblems.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No problems found matching your criteria.</p>
+              <p className="text-gray-400 text-lg">No problems found matching your criteria.</p>
             </div>
           ) : (
             filteredProblems.map(problem => (
               <Link key={problem.id} to={`/problem/${problem.id}`}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                <Card className="bg-black/50 backdrop-blur-sm border-white/20 hover:border-white/40 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] cursor-pointer group">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <span className="text-sm font-medium text-gray-500 w-8">#{problem.id}</span>
+                        <span className="text-sm font-medium text-gray-400 w-8">#{problem.id}</span>
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900 hover:text-primary transition-colors">
+                          <h3 className="text-lg font-semibold text-white group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] transition-all duration-300">
                             {problem.title}
                           </h3>
                           <div className="flex items-center space-x-2 mt-2">
                             <Badge className={getDifficultyColor(problem.difficulty)}>
                               {problem.difficulty}
                             </Badge>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-400">
                               {problem.acceptance_rate}% acceptance
                             </span>
                           </div>
@@ -129,24 +129,24 @@ export default function Problems() {
                       <div className="text-right">
                         <div className="flex flex-wrap gap-1 mb-2 justify-end">
                           {problem.companies.slice(0, 3).map(company => (
-                            <Badge key={company} variant="outline" className="text-xs">
+                            <Badge key={company} variant="outline" className="text-xs border-white/30 text-gray-300">
                               {company}
                             </Badge>
                           ))}
                           {problem.companies.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs border-white/30 text-gray-300">
                               +{problem.companies.length - 3}
                             </Badge>
                           )}
                         </div>
                         <div className="flex flex-wrap gap-1 justify-end">
                           {problem.topics.slice(0, 2).map(topic => (
-                            <Badge key={topic} variant="secondary" className="text-xs">
+                            <Badge key={topic} className="text-xs bg-white/10 text-gray-300 border-white/20">
                               {topic}
                             </Badge>
                           ))}
                           {problem.topics.length > 2 && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge className="text-xs bg-white/10 text-gray-300 border-white/20">
                               +{problem.topics.length - 2}
                             </Badge>
                           )}
