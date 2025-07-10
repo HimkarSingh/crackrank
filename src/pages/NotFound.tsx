@@ -1,4 +1,4 @@
-
+import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,35 +15,38 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white font-inter">
+    <div className="min-h-screen bg-background text-foreground font-inter flex items-center justify-center">
       <div className="text-center max-w-md mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-8xl font-bold mb-4 text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]">404</h1>
-          <div className="w-24 h-1 bg-white mx-auto mb-6 drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"></div>
-          <h2 className="text-2xl font-semibold mb-4 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+          <div className="text-8xl font-bold text-primary/20 mb-4 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">404</div>
+          <h1 className="text-3xl font-bold text-foreground mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
             Page Not Found
-          </h2>
-          <p className="text-gray-300 text-lg mb-8">
+          </h1>
+          <p className="text-muted-foreground mb-8">
             The page you're looking for doesn't exist or has been moved.
           </p>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            onClick={() => window.history.back()}
-            variant="outline"
-            className="bg-transparent border-white/30 text-white hover:bg-white hover:text-black transition-all duration-200 shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:shadow-[0_0_15px_rgba(255,255,255,0.4)]"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Go Back
-          </Button>
-          <Button
-            onClick={() => window.location.href = '/'}
-            className="bg-white text-black hover:bg-gray-100 transition-all duration-200 shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:shadow-[0_0_20px_rgba(255,255,255,0.5)] hover:scale-105"
-          >
-            <Home className="h-4 w-4 mr-2" />
-            Return Home
-          </Button>
+        <div className="space-y-4">
+          <Link to="/">
+            <Button 
+              size="lg"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:scale-105"
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Go Home
+            </Button>
+          </Link>
+          
+          <Link to="/problems">
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="w-full bg-transparent border-border text-foreground hover:bg-accent hover:border-primary/30 transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.05)] hover:shadow-[0_0_25px_rgba(255,255,255,0.1)]"
+            >
+              Browse Problems
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

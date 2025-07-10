@@ -1,164 +1,198 @@
-
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { sampleProblems, companies, topics } from "@/data/problems";
-import { Search, Filter } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Search, Filter, X, CheckCircle, Circle } from "lucide-react";
 
 export default function Problems() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
-  const [selectedCompany, setSelectedCompany] = useState("all");
   const [selectedTopic, setSelectedTopic] = useState("all");
 
+  // Mock data - in real app this would come from API
+  const problems = [
+    { id: 1, title: "Two Sum", difficulty: "Easy", topic: "Array", acceptanceRate: 72, solved: true },
+    { id: 2, title: "Add Two Numbers", difficulty: "Medium", topic: "Linked List", acceptanceRate: 45, solved: false },
+    { id: 3, title: "Longest Substring Without Repeating Characters", difficulty: "Medium", topic: "String", acceptanceRate: 38, solved: true },
+    { id: 4, title: "Median of Two Sorted Arrays", difficulty: "Hard", topic: "Array", acceptanceRate: 35, solved: false },
+    { id: 5, title: "Longest Palindromic Substring", difficulty: "Medium", topic: "String", acceptanceRate: 42, solved: false },
+    { id: 6, title: "ZigZag Conversion", difficulty: "Medium", topic: "String", acceptanceRate: 48, solved: true },
+    { id: 7, title: "Reverse Integer", difficulty: "Medium", topic: "Math", acceptanceRate: 28, solved: false },
+    { id: 8, title: "String to Integer (atoi)", difficulty: "Medium", topic: "String", acceptanceRate: 16, solved: false },
+    { id: 9, title: "Palindrome Number", difficulty: "Easy", topic: "Math", acceptanceRate: 56, solved: true },
+    { id: 10, title: "Regular Expression Matching", difficulty: "Hard", topic: "Dynamic Programming", acceptanceRate: 27, solved: false },
+  ];
+
   const filteredProblems = useMemo(() => {
-    return sampleProblems.filter(problem => {
+    return problems.filter(problem => {
       const matchesSearch = problem.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            problem.id.toString().includes(searchTerm);
       const matchesDifficulty = selectedDifficulty === "all" || problem.difficulty === selectedDifficulty;
-      const matchesCompany = selectedCompany === "all" || problem.companies.includes(selectedCompany);
-      const matchesTopic = selectedTopic === "all" || problem.topics.includes(selectedTopic);
+      const matchesTopic = selectedTopic === "all" || problem.topic === selectedTopic;
 
-      return matchesSearch && matchesDifficulty && matchesCompany && matchesTopic;
+      return matchesSearch && matchesDifficulty && matchesTopic;
     });
-  }, [searchTerm, selectedDifficulty, selectedCompany, selectedTopic]);
+  }, [searchTerm, selectedDifficulty, selectedTopic]);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case "Easy": return "bg-green-500 text-white border-green-400";
-      case "Medium": return "bg-yellow-500 text-black border-yellow-400";
-      case "Hard": return "bg-red-500 text-white border-red-400";
-      default: return "bg-gray-500 text-white";
+      case "Easy": return "border-emerald-400 text-emerald-500 bg-emerald-500/10";
+      case "Medium": return "border-amber-400 text-amber-500 bg-amber-500/10";
+      case "Hard": return "border-red-400 text-red-500 bg-red-500/10";
+      default: return "border-border text-muted-foreground";
     }
   };
 
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedDifficulty("all");
+    setSelectedTopic("all");
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white font-inter">
+    <div className="min-h-screen bg-background text-foreground font-inter">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)]">Problems</h1>
-          <p className="text-gray-300 text-lg">Practice coding problems to ace your interviews</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+            Coding Problems
+          </h1>
+          <p className="text-muted-foreground">Solve coding challenges to improve your interview skills</p>
         </div>
 
-        {/* Search and Filters */}
-        <div className="bg-black/50 backdrop-blur-sm rounded-xl border border-white/20 p-6 mb-8 shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="lg:col-span-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        {/* Filters */}
+        <Card className="mb-8 border border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardContent className="p-6">
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center space-x-2">
+                <Filter className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-card-foreground">Filters:</span>
+              </div>
+              
+              <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
+                <SelectTrigger className="w-40 bg-background border-border">
+                  <SelectValue placeholder="Difficulty" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Difficulty</SelectItem>
+                  <SelectItem value="Easy">Easy</SelectItem>
+                  <SelectItem value="Medium">Medium</SelectItem>
+                  <SelectItem value="Hard">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+                <SelectTrigger className="w-48 bg-background border-border">
+                  <SelectValue placeholder="Topic" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Topics</SelectItem>
+                  <SelectItem value="Array">Array</SelectItem>
+                  <SelectItem value="String">String</SelectItem>
+                  <SelectItem value="Dynamic Programming">Dynamic Programming</SelectItem>
+                  <SelectItem value="Tree">Tree</SelectItem>
+                  <SelectItem value="Graph">Graph</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search problems..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-black/30 border-white/30 text-white placeholder-gray-400 focus:border-white/60 focus:ring-white/20"
+                  className="pl-10 bg-background border-border"
                 />
               </div>
+
+              {(selectedDifficulty !== "all" || selectedTopic !== "all" || searchTerm) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="bg-transparent border-border text-foreground hover:bg-accent"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear
+                </Button>
+              )}
             </div>
-            
-            <Select value={selectedDifficulty} onValueChange={setSelectedDifficulty}>
-              <SelectTrigger className="bg-black/30 border-white/30 text-white focus:border-white/60">
-                <SelectValue placeholder="Difficulty" />
-              </SelectTrigger>
-              <SelectContent className="bg-black border-white/30">
-                <SelectItem value="all">All Difficulties</SelectItem>
-                <SelectItem value="Easy">Easy</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Hard">Hard</SelectItem>
-              </SelectContent>
-            </Select>
+          </CardContent>
+        </Card>
 
-            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-              <SelectTrigger className="bg-black/30 border-white/30 text-white focus:border-white/60">
-                <SelectValue placeholder="Company" />
-              </SelectTrigger>
-              <SelectContent className="bg-black border-white/30">
-                <SelectItem value="all">All Companies</SelectItem>
-                {companies.map(company => (
-                  <SelectItem key={company} value={company}>{company}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-              <SelectTrigger className="bg-black/30 border-white/30 text-white focus:border-white/60">
-                <SelectValue placeholder="Topic" />
-              </SelectTrigger>
-              <SelectContent className="bg-black border-white/30">
-                <SelectItem value="all">All Topics</SelectItem>
-                {topics.map(topic => (
-                  <SelectItem key={topic} value={topic}>{topic}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Problems List */}
-        <div className="space-y-4">
-          {filteredProblems.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">No problems found matching your criteria.</p>
-            </div>
-          ) : (
-            filteredProblems.map(problem => (
-              <Link key={problem.id} to={`/problem/${problem.id}`}>
-                <Card className="bg-black/50 backdrop-blur-sm border-white/20 hover:border-white/40 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] cursor-pointer group">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <span className="text-sm font-medium text-gray-400 w-8">#{problem.id}</span>
-                        <div>
-                          <h3 className="text-lg font-semibold text-white group-hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] transition-all duration-300">
-                            {problem.title}
-                          </h3>
-                          <div className="flex items-center space-x-2 mt-2">
-                            <Badge className={getDifficultyColor(problem.difficulty)}>
-                              {problem.difficulty}
-                            </Badge>
-                            <span className="text-sm text-gray-400">
-                              {problem.acceptance_rate}% acceptance
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="text-right">
-                        <div className="flex flex-wrap gap-1 mb-2 justify-end">
-                          {problem.companies.slice(0, 3).map(company => (
-                            <Badge key={company} variant="outline" className="text-xs border-white/30 text-gray-300">
-                              {company}
-                            </Badge>
-                          ))}
-                          {problem.companies.length > 3 && (
-                            <Badge variant="outline" className="text-xs border-white/30 text-gray-300">
-                              +{problem.companies.length - 3}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-1 justify-end">
-                          {problem.topics.slice(0, 2).map(topic => (
-                            <Badge key={topic} className="text-xs bg-white/10 text-gray-300 border-white/20">
-                              {topic}
-                            </Badge>
-                          ))}
-                          {problem.topics.length > 2 && (
-                            <Badge className="text-xs bg-white/10 text-gray-300 border-white/20">
-                              +{problem.topics.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
+        {/* Problems Table */}
+        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-border/50 hover:bg-accent/30">
+                <TableHead className="text-card-foreground">Problem</TableHead>
+                <TableHead className="text-card-foreground">Difficulty</TableHead>
+                <TableHead className="text-card-foreground">Topic</TableHead>
+                <TableHead className="text-card-foreground">Acceptance Rate</TableHead>
+                <TableHead className="text-card-foreground">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredProblems.map((problem) => (
+                <TableRow 
+                  key={problem.id} 
+                  className="border-border/30 hover:bg-accent/20 cursor-pointer transition-all duration-200 group"
+                  onClick={() => navigate(`/problem/${problem.id}`)}
+                >
+                  <TableCell className="font-medium">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-card-foreground group-hover:text-primary transition-colors">
+                        {problem.title}
+                      </span>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))
-          )}
-        </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant="outline" 
+                      className={`${getDifficultyColor(problem.difficulty)} group-hover:shadow-[0_0_8px_rgba(255,255,255,0.2)] transition-all duration-200 border`}
+                    >
+                      {problem.difficulty}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-muted-foreground group-hover:text-card-foreground transition-colors">
+                      {problem.topic}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-muted-foreground group-hover:text-card-foreground transition-colors">
+                      {problem.acceptanceRate}%
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    {problem.solved ? (
+                      <CheckCircle className="h-5 w-5 text-emerald-500 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+
+        {filteredProblems.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">No problems found matching your criteria.</p>
+            <Button 
+              variant="outline" 
+              onClick={clearFilters} 
+              className="mt-4 bg-transparent border-border text-foreground hover:bg-accent"
+            >
+              Clear Filters
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
