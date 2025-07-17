@@ -1,15 +1,28 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Code, User, Moon, Sun } from "lucide-react";
+import { Code, User, Moon, Sun, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useAuth } from "@/hooks/useAuth";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Navbar() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
+  const { user, signOut } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -69,20 +82,50 @@ export default function Navbar() {
                 <Moon className="h-4 w-4 drop-shadow-[0_0_6px_rgba(0,0,0,0.6)]" />
               )}
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="font-inter bg-transparent border-border text-foreground hover:bg-accent hover:text-foreground hover:border-primary/40 transition-all duration-200 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]"
-            >
-              <User className="h-4 w-4 mr-2" />
-              Login
-            </Button>
-            <Button 
-              size="sm" 
-              className="bg-primary text-primary-foreground hover:bg-primary/90 font-inter transition-all duration-200 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:scale-105"
-            >
-              Sign Up
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        {user.email?.charAt(0).toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuItem className="flex-col items-start">
+                    <div className="font-medium">{user.user_metadata?.full_name || 'User'}</div>
+                    <div className="text-xs text-muted-foreground">{user.email}</div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  asChild
+                  className="font-inter bg-transparent border-border text-foreground hover:bg-accent hover:text-foreground hover:border-primary/40 transition-all duration-200 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]"
+                >
+                  <Link to="/auth">
+                    <User className="h-4 w-4 mr-2" />
+                    Login
+                  </Link>
+                </Button>
+                <Button 
+                  size="sm" 
+                  asChild
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-inter transition-all duration-200 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:scale-105"
+                >
+                  <Link to="/auth">Sign Up</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
