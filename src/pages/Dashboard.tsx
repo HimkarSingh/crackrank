@@ -1,11 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Calendar, CheckCircle, TrendingUp, Clock, Code } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, CheckCircle, TrendingUp, Clock, Code, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Dashboard() {
-  // Mock user data
-  const userStats = {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [userStats, setUserStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Demo data for non-authenticated users
+  const demoStats = {
     totalSolved: 24,
     totalProblems: 50,
     weeklyStreak: 7,
@@ -13,6 +23,7 @@ export default function Dashboard() {
     easyCompleted: 15,
     mediumCompleted: 7,
     hardCompleted: 2,
+    thisWeek: 12,
     recentSubmissions: [
       { id: 1, problem: "Two Sum", verdict: "Accepted", timestamp: "2 hours ago", difficulty: "Easy" },
       { id: 2, problem: "3Sum", verdict: "Wrong Answer", timestamp: "5 hours ago", difficulty: "Medium" },
@@ -20,6 +31,36 @@ export default function Dashboard() {
       { id: 4, problem: "Maximum Subarray", verdict: "Accepted", timestamp: "2 days ago", difficulty: "Medium" },
       { id: 5, problem: "Climbing Stairs", verdict: "Accepted", timestamp: "3 days ago", difficulty: "Easy" },
     ]
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchUserStats();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const fetchUserStats = async () => {
+    try {
+      // For now, we'll use demo data but you can implement real fetching here
+      // This is where you'd fetch real user statistics from your database
+      setUserStats({
+        totalSolved: 0,
+        totalProblems: 50,
+        weeklyStreak: 0,
+        accuracy: 0,
+        easyCompleted: 0,
+        mediumCompleted: 0,
+        hardCompleted: 0,
+        thisWeek: 0,
+        recentSubmissions: []
+      });
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getVerdictColor = (verdict: string) => {
@@ -37,14 +78,55 @@ export default function Dashboard() {
     }
   };
 
+  const displayStats = user ? userStats : demoStats;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background font-inter">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Login Banner for Non-Authenticated Users */}
+        {!user && (
+          <Card className="mb-8 border-2 border-primary/50 bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center space-x-4">
+                  <LogIn className="h-8 w-8 text-primary" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Join Our Coding Community!</h3>
+                    <p className="text-muted-foreground">
+                      Sign up to track your real progress, earn achievements, and compete with others.
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => navigate('/auth')}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login / Sign Up
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-            Dashboard
+            {user ? "Your Dashboard" : "Dashboard Preview"}
           </h1>
-          <p className="text-muted-foreground">Track your coding interview preparation progress</p>
+          <p className="text-muted-foreground">
+            {user ? "Track your coding interview preparation progress" : "See what your dashboard will look like"}
+          </p>
         </div>
 
         {/* Stats Overview */}
@@ -55,12 +137,12 @@ export default function Dashboard() {
               <CheckCircle className="h-4 w-4 text-emerald-500 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-card-foreground">{userStats.totalSolved}</div>
+              <div className="text-2xl font-bold text-card-foreground">{displayStats?.totalSolved || 0}</div>
               <p className="text-xs text-muted-foreground">
-                out of {userStats.totalProblems} total
+                out of {displayStats?.totalProblems || 50} total
               </p>
               <Progress 
-                value={(userStats.totalSolved / userStats.totalProblems) * 100} 
+                value={displayStats ? (displayStats.totalSolved / displayStats.totalProblems) * 100 : 0} 
                 className="mt-2 bg-secondary border border-border/30"
               />
             </CardContent>
@@ -73,7 +155,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold flex items-center text-card-foreground">
-                {userStats.weeklyStreak}
+                {displayStats?.weeklyStreak || 0}
                 <span className="text-amber-500 ml-1 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]">🔥</span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -88,12 +170,12 @@ export default function Dashboard() {
               <TrendingUp className="h-4 w-4 text-primary drop-shadow-[0_0_6px_rgba(255,255,255,0.6)]" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-card-foreground">{userStats.accuracy}%</div>
+              <div className="text-2xl font-bold text-card-foreground">{displayStats?.accuracy || 0}%</div>
               <p className="text-xs text-muted-foreground">
                 acceptance rate
               </p>
               <Progress 
-                value={userStats.accuracy} 
+                value={displayStats?.accuracy || 0} 
                 className="mt-2 bg-secondary border border-border/30"
               />
             </CardContent>
@@ -105,7 +187,7 @@ export default function Dashboard() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-card-foreground">12</div>
+              <div className="text-2xl font-bold text-card-foreground">{displayStats?.thisWeek || 0}</div>
               <p className="text-xs text-muted-foreground">
                 problems solved
               </p>
@@ -128,12 +210,14 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center space-x-2">
                       <Badge className={getDifficultyColor("Easy")}>Easy</Badge>
-                      <span className="text-sm text-muted-foreground">{userStats.easyCompleted}/20</span>
+                      <span className="text-sm text-muted-foreground">{displayStats?.easyCompleted || 0}/20</span>
                     </div>
-                    <span className="text-sm font-medium text-card-foreground">{Math.round((userStats.easyCompleted / 20) * 100)}%</span>
+                    <span className="text-sm font-medium text-card-foreground">
+                      {Math.round(((displayStats?.easyCompleted || 0) / 20) * 100)}%
+                    </span>
                   </div>
                   <Progress 
-                    value={(userStats.easyCompleted / 20) * 100} 
+                    value={((displayStats?.easyCompleted || 0) / 20) * 100} 
                     className="h-2 bg-secondary border border-border/30"
                   />
                 </div>
@@ -142,12 +226,14 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center space-x-2">
                       <Badge className={getDifficultyColor("Medium")}>Medium</Badge>
-                      <span className="text-sm text-muted-foreground">{userStats.mediumCompleted}/20</span>
+                      <span className="text-sm text-muted-foreground">{displayStats?.mediumCompleted || 0}/20</span>
                     </div>
-                    <span className="text-sm font-medium text-card-foreground">{Math.round((userStats.mediumCompleted / 20) * 100)}%</span>
+                    <span className="text-sm font-medium text-card-foreground">
+                      {Math.round(((displayStats?.mediumCompleted || 0) / 20) * 100)}%
+                    </span>
                   </div>
                   <Progress 
-                    value={(userStats.mediumCompleted / 20) * 100} 
+                    value={((displayStats?.mediumCompleted || 0) / 20) * 100} 
                     className="h-2 bg-secondary border border-border/30"
                   />
                 </div>
@@ -156,12 +242,14 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center space-x-2">
                       <Badge className={getDifficultyColor("Hard")}>Hard</Badge>
-                      <span className="text-sm text-muted-foreground">{userStats.hardCompleted}/10</span>
+                      <span className="text-sm text-muted-foreground">{displayStats?.hardCompleted || 0}/10</span>
                     </div>
-                    <span className="text-sm font-medium text-card-foreground">{Math.round((userStats.hardCompleted / 10) * 100)}%</span>
+                    <span className="text-sm font-medium text-card-foreground">
+                      {Math.round(((displayStats?.hardCompleted || 0) / 10) * 100)}%
+                    </span>
                   </div>
                   <Progress 
-                    value={(userStats.hardCompleted / 10) * 100} 
+                    value={((displayStats?.hardCompleted || 0) / 10) * 100} 
                     className="h-2 bg-secondary border border-border/30"
                   />
                 </div>
@@ -176,25 +264,33 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {userStats.recentSubmissions.map((submission) => (
-                  <div 
-                    key={submission.id} 
-                    className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card/30 hover:border-primary/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all duration-300"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <Badge className={getDifficultyColor(submission.difficulty)}>
-                        {submission.difficulty}
-                      </Badge>
-                      <div>
-                        <p className="font-medium text-sm text-card-foreground">{submission.problem}</p>
-                        <p className="text-xs text-muted-foreground">{submission.timestamp}</p>
+                {displayStats?.recentSubmissions?.length > 0 ? (
+                  displayStats.recentSubmissions.map((submission) => (
+                    <div 
+                      key={submission.id} 
+                      className="flex items-center justify-between p-3 border border-border/50 rounded-lg bg-card/30 hover:border-primary/30 hover:shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all duration-300"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Badge className={getDifficultyColor(submission.difficulty)}>
+                          {submission.difficulty}
+                        </Badge>
+                        <div>
+                          <p className="font-medium text-sm text-card-foreground">{submission.problem}</p>
+                          <p className="text-xs text-muted-foreground">{submission.timestamp}</p>
+                        </div>
                       </div>
+                      <Badge className={getVerdictColor(submission.verdict)}>
+                        {submission.verdict}
+                      </Badge>
                     </div>
-                    <Badge className={getVerdictColor(submission.verdict)}>
-                      {submission.verdict}
-                    </Badge>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      {user ? "No submissions yet. Start solving problems!" : "Your submissions will appear here"}
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
@@ -207,7 +303,9 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="h-40 bg-secondary/30 border border-border/30 rounded-lg flex items-center justify-center">
-              <p className="text-muted-foreground">Activity graph coming soon...</p>
+              <p className="text-muted-foreground">
+                {user ? "Activity graph coming soon..." : "Your activity graph will appear here"}
+              </p>
             </div>
           </CardContent>
         </Card>
