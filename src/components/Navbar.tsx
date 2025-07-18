@@ -1,9 +1,9 @@
-
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Code, User, Moon, Sun, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
+import { useAdmin } from '@/hooks/useAdmin';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ export default function Navbar() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -66,6 +67,18 @@ export default function Navbar() {
               >
                 Discuss
               </Link>
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className={`px-3 py-2 text-sm font-medium transition-all duration-200 font-inter ${
+                    isActive('/admin')
+                      ? 'text-foreground border-b-2 border-foreground drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]'
+                      : 'text-muted-foreground hover:text-foreground hover:drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]'
+                  }`}
+                >
+                  Admin
+                </Link>
+              )}
             </div>
           </div>
 
