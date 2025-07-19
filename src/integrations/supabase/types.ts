@@ -14,6 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      discussion_replies: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          discussion_id: string
+          id: string
+          likes_count: number
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          discussion_id: string
+          id?: string
+          likes_count?: number
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          discussion_id?: string
+          id?: string
+          likes_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_replies_discussion_id_fkey"
+            columns: ["discussion_id"]
+            isOneToOne: false
+            referencedRelation: "discussions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discussions: {
+        Row: {
+          author_id: string
+          category: string
+          content: string
+          created_at: string
+          id: string
+          is_important: boolean
+          is_pinned: boolean
+          likes_count: number
+          replies_count: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          category?: string
+          content: string
+          created_at?: string
+          id?: string
+          is_important?: boolean
+          is_pinned?: boolean
+          likes_count?: number
+          replies_count?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_important?: boolean
+          is_pinned?: boolean
+          likes_count?: number
+          replies_count?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       problems: {
         Row: {
           acceptance_rate: number | null

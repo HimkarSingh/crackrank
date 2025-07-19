@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Users, BarChart3 } from 'lucide-react';
+import { Plus, Edit, Trash2, Users, BarChart3, MessageSquare, Pin, Lock, Shield } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface Problem {
@@ -31,9 +31,27 @@ interface UserProfile {
   role?: string;
 }
 
+interface Discussion {
+  id: string;
+  title: string;
+  content: string;
+  author_id: string;
+  category: string;
+  is_pinned: boolean;
+  is_important: boolean;
+  likes_count: number;
+  replies_count: number;
+  created_at: string;
+  profiles?: {
+    full_name: string | null;
+    avatar_url?: string | null;
+  } | null;
+}
+
 export default function Admin() {
   const [problems, setProblems] = useState<Problem[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
+  const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProblem, setEditingProblem] = useState<Problem | null>(null);
