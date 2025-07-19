@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Filter, X, CheckCircle, Circle } from "lucide-react";
+import { Search, Filter, X, CheckCircle, Circle, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Problems() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [selectedTopic, setSelectedTopic] = useState("all");
@@ -57,11 +59,31 @@ export default function Problems() {
   return (
     <div className="min-h-screen bg-background text-foreground font-inter">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Login Banner for Non-Authenticated Users */}
+        {!user && (
+          <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-foreground mb-1">Join Our Coding Community!</h3>
+                  <p className="text-sm text-muted-foreground">Sign up to track your progress, save solutions, and compete with others</p>
+                </div>
+                <Button onClick={() => navigate('/auth')} className="shrink-0">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign Up
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
             Coding Problems
           </h1>
-          <p className="text-muted-foreground">Solve coding challenges to improve your interview skills</p>
+          <p className="text-muted-foreground">
+            {user ? "Solve coding challenges to improve your interview skills" : "Explore our coding challenges - sign up to track your progress!"}
+          </p>
         </div>
 
         {/* Filters */}

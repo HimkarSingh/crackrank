@@ -32,10 +32,10 @@ const App = () => (
               <Navbar />
               <Routes>
                 <Route path="/" element={<Index />} />
-                <Route path="/problems" element={<ProtectedRoute><Problems /></ProtectedRoute>} />
+                <Route path="/problems" element={<Problems />} />
                 <Route path="/problem/:id" element={<ProtectedRoute><ProblemDetail /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/discuss" element={<ProtectedRoute><Discuss /></ProtectedRoute>} />
+                <Route path="/discuss" element={<Discuss />} />
                 <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
                 <Route path="/auth" element={<Auth />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

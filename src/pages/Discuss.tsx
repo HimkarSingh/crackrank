@@ -1,9 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ArrowUp, Clock, User, ArrowRight, Heart, MessageCircle } from "lucide-react";
+import { MessageSquare, ArrowUp, Clock, User, ArrowRight, Heart, MessageCircle, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export default function Discuss() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const discussions = [
     {
       id: 1,
@@ -76,17 +80,40 @@ export default function Discuss() {
   return (
     <div className="min-h-screen bg-background text-foreground font-inter">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Login Banner for Non-Authenticated Users */}
+        {!user && (
+          <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-foreground mb-1">Join Our Discussion Community!</h3>
+                  <p className="text-sm text-muted-foreground">Sign up to participate in discussions, ask questions, and share knowledge</p>
+                </div>
+                <Button onClick={() => navigate('/auth')} className="shrink-0">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign Up
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="mb-8">
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                 Discussion Forum
               </h1>
-              <p className="text-muted-foreground">Share knowledge and learn from the community</p>
+              <p className="text-muted-foreground">
+                {user ? "Share knowledge and learn from the community" : "Explore discussions - sign up to participate!"}
+              </p>
             </div>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105">
+            <Button 
+              onClick={() => user ? undefined : navigate('/auth')}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105"
+            >
               <MessageSquare className="h-4 w-4 mr-2" />
-              New Discussion
+              {user ? "New Discussion" : "Sign Up to Discuss"}
             </Button>
           </div>
         </div>
