@@ -96,24 +96,19 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Login Banner for Non-Authenticated Users */}
         {!user && (
-          <Card className="mb-8 border-2 border-primary/50 bg-gradient-to-r from-primary/10 to-secondary/10 backdrop-blur-sm shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center space-x-4">
-                  <LogIn className="h-8 w-8 text-primary" />
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">Join Our Coding Community!</h3>
-                    <p className="text-muted-foreground">
-                      Sign up to track your real progress, earn achievements, and compete with others.
-                    </p>
-                  </div>
+          <Card className="mb-6 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-foreground mb-1">Join Our Coding Community!</h3>
+                  <p className="text-sm text-muted-foreground">Sign up to track your real progress, earn achievements, and compete with others</p>
                 </div>
                 <Button 
                   onClick={() => navigate('/auth')}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                  className="shrink-0"
                 >
                   <LogIn className="h-4 w-4 mr-2" />
-                  Login / Sign Up
+                  Sign Up
                 </Button>
               </div>
             </CardContent>
