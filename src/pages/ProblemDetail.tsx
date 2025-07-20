@@ -241,7 +241,7 @@ export default function ProblemDetail() {
               </CardHeader>
               <CardContent>
                 <MonacoEditor
-                  height="300px"
+                  height="500px"
                   language={language === "cpp" ? "cpp" : language}
                   value={code}
                   theme={theme === "dark" ? "vs-dark" : "light"}

@@ -1,18 +1,32 @@
 import { Link } from "react-router-dom";
-import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [handled, setHandled] = useState(false);
 
   useEffect(() => {
+    // Check for Supabase social login error in URL (e.g., error_code, error_description)
+    const params = new URLSearchParams(location.search);
+    const errorCode = params.get('error_code') || params.get('error') || '';
+    const errorDesc = params.get('error_description') || params.get('error_message') || '';
+    if ((errorCode && errorCode.toLowerCase().includes('not_found')) || errorDesc) {
+      // Redirect to /auth with error message
+      setHandled(true);
+      navigate(`/auth?error=${encodeURIComponent(errorDesc || errorCode)}`);
+      return;
+    }
     console.error(
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
-  }, [location.pathname]);
+  }, [location.pathname, location.search, navigate]);
+
+  if (handled) return null;
 
   return (
     <div className="min-h-screen bg-background text-foreground font-inter flex items-center justify-center">
