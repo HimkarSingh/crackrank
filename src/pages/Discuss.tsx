@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogIn, MessageSquare, Heart, Pin, Lock, Plus, Trash2, Edit, AlertTriangle } from 'lucide-react';
+import { LogIn, MessageSquare, Heart, Pin, Lock, Plus, Trash2, Edit, Send, Calendar, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,20 +31,37 @@ interface Discussion {
   } | null;
 }
 
+interface Reply {
+  id: string;
+  discussion_id: string;
+  author_id: string;
+  content: string;
+  likes_count: number;
+  created_at: string;
+  profiles?: {
+    full_name: string | null;
+    avatar_url?: string | null;
+  } | null;
+}
+
 export default function Discuss() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isAdmin } = useAdmin();
   const { toast } = useToast();
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
+  const [replies, setReplies] = useState<Reply[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDiscussion, setSelectedDiscussion] = useState<Discussion | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingDiscussion, setEditingDiscussion] = useState<Discussion | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [newDiscussion, setNewDiscussion] = useState({
     title: '',
     content: '',
     category: 'general'
   });
+  const [newReply, setNewReply] = useState('');
 
   const featuredTopics = [
     'Getting Started',
@@ -56,21 +73,27 @@ export default function Discuss() {
   ];
 
   const categories = [
-    { value: 'general', label: 'General Discussion' },
-    { value: 'algorithms', label: 'Algorithms' },
-    { value: 'data-structures', label: 'Data Structures' },
-    { value: 'contests', label: 'Contests' },
-    { value: 'announcements', label: 'Announcements' },
-    { value: 'help', label: 'Help & Support' }
+    { value: 'all', label: 'All Categories', count: discussions.length, icon: TrendingUp },
+    { value: 'general', label: 'General Discussion', count: discussions.filter(d => d.category === 'general').length, icon: MessageSquare },
+    { value: 'algorithms', label: 'Algorithms', count: discussions.filter(d => d.category === 'algorithms').length, icon: TrendingUp },
+    { value: 'data-structures', label: 'Data Structures', count: discussions.filter(d => d.category === 'data-structures').length, icon: MessageSquare },
+    { value: 'contests', label: 'Contests', count: discussions.filter(d => d.category === 'contests').length, icon: TrendingUp },
+    { value: 'announcements', label: 'Announcements', count: discussions.filter(d => d.category === 'announcements').length, icon: Pin },
+    { value: 'help', label: 'Help & Support', count: discussions.filter(d => d.category === 'help').length, icon: Heart }
   ];
 
   useEffect(() => {
     fetchDiscussions();
   }, []);
 
+  useEffect(() => {
+    if (selectedDiscussion) {
+      fetchReplies(selectedDiscussion.id);
+    }
+  }, [selectedDiscussion]);
+
   const fetchDiscussions = async () => {
     try {
-      // First get discussions
       const { data: discussionsData, error: discussionsError } = await supabase
         .from('discussions')
         .select('*')
@@ -79,7 +102,6 @@ export default function Discuss() {
 
       if (discussionsError) throw discussionsError;
 
-      // Then get profile data for each discussion
       const discussionsWithProfiles = await Promise.all(
         (discussionsData || []).map(async (discussion) => {
           const { data: profileData } = await supabase
@@ -105,6 +127,37 @@ export default function Discuss() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReplies = async (discussionId: string) => {
+    try {
+      const { data: repliesData, error: repliesError } = await supabase
+        .from('discussion_replies')
+        .select('*')
+        .eq('discussion_id', discussionId)
+        .order('created_at', { ascending: true });
+
+      if (repliesError) throw repliesError;
+
+      const repliesWithProfiles = await Promise.all(
+        (repliesData || []).map(async (reply) => {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('full_name, avatar_url')
+            .eq('user_id', reply.author_id)
+            .single();
+
+          return {
+            ...reply,
+            profiles: profileData
+          };
+        })
+      );
+
+      setReplies(repliesWithProfiles);
+    } catch (error) {
+      console.error('Error fetching replies:', error);
     }
   };
 
@@ -153,6 +206,43 @@ export default function Discuss() {
     }
   };
 
+  const handleCreateReply = async () => {
+    if (!user || !selectedDiscussion || !newReply.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from('discussion_replies')
+        .insert({
+          discussion_id: selectedDiscussion.id,
+          content: newReply.trim(),
+          author_id: user.id
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Reply added successfully!"
+      });
+
+      setNewReply('');
+      fetchReplies(selectedDiscussion.id);
+      
+      setDiscussions(prev => prev.map(d => 
+        d.id === selectedDiscussion.id 
+          ? { ...d, replies_count: d.replies_count + 1 }
+          : d
+      ));
+    } catch (error) {
+      console.error('Error creating reply:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add reply",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleUpdateDiscussion = async () => {
     if (!editingDiscussion || !user) return;
 
@@ -175,6 +265,9 @@ export default function Discuss() {
 
       setEditingDiscussion(null);
       fetchDiscussions();
+      if (selectedDiscussion && selectedDiscussion.id === editingDiscussion.id) {
+        setSelectedDiscussion(editingDiscussion);
+      }
     } catch (error) {
       console.error('Error updating discussion:', error);
       toast({
@@ -278,6 +371,10 @@ export default function Discuss() {
     return user && ((discussion.author_id === user.id && !discussion.is_important) || isAdmin);
   };
 
+  const filteredDiscussions = selectedCategory === 'all' 
+    ? discussions 
+    : discussions.filter(d => d.category === selectedCategory);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -357,7 +454,7 @@ export default function Discuss() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((cat) => (
+                      {categories.filter(cat => cat.value !== 'all').map((cat) => (
                         <SelectItem key={cat.value} value={cat.value}>
                           {cat.label}
                         </SelectItem>
@@ -385,11 +482,88 @@ export default function Discuss() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar - Categories */}
+          <div className="lg:order-1 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Categories</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {categories.map((category) => {
+                  const IconComponent = category.icon;
+                  return (
+                    <div 
+                      key={category.value}
+                      className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
+                        selectedCategory === category.value 
+                          ? 'bg-primary/10 text-primary border border-primary/20' 
+                          : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => setSelectedCategory(category.value)}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <IconComponent className="h-4 w-4" />
+                        <span className="text-sm font-medium">{category.label}</span>
+                      </div>
+                      <Badge variant="secondary">{category.count}</Badge>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+
+            {/* Featured Topics */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Featured Topics</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {featuredTopics.map((topic) => (
+                  <div key={topic} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer">
+                    <span className="text-sm font-medium">{topic}</span>
+                    <Badge variant="secondary">{Math.floor(Math.random() * 20) + 1}</Badge>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Activity Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Community Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <MessageSquare className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm">Total Discussions</span>
+                  </div>
+                  <span className="font-semibold">{discussions.length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Heart className="h-4 w-4 text-red-500" />
+                    <span className="text-sm">Active Today</span>
+                  </div>
+                  <span className="font-semibold">24</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Calendar className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">This Week</span>
+                  </div>
+                  <span className="font-semibold">156</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Main Discussion List */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 lg:order-2">
             <div className="space-y-4">
-              {discussions.map((discussion) => (
-                <Card key={discussion.id} className="hover:shadow-md transition-shadow">
+              {filteredDiscussions.map((discussion) => (
+                <Card key={discussion.id} className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => setSelectedDiscussion(discussion)}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -401,7 +575,7 @@ export default function Discuss() {
                       </div>
                       
                       {(canEditDiscussion(discussion) || canDeleteDiscussion(discussion) || isAdmin) && (
-                        <div className="flex gap-1">
+                        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                           {isAdmin && (
                             <Button
                               variant="ghost"
@@ -436,7 +610,7 @@ export default function Discuss() {
                       )}
                     </div>
 
-                    <h3 className="text-lg font-semibold text-foreground mb-2 hover:text-primary cursor-pointer">
+                    <h3 className="text-lg font-semibold text-foreground mb-2 hover:text-primary">
                       {discussion.title}
                     </h3>
 
@@ -477,54 +651,144 @@ export default function Discuss() {
                 </Card>
               ))}
 
-              {discussions.length === 0 && (
+              {filteredDiscussions.length === 0 && (
                 <Card className="p-12 text-center">
                   <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No discussions yet</h3>
-                  <p className="text-muted-foreground mb-4">Be the first to start a conversation!</p>
-                  {user && (
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    {selectedCategory === 'all' ? 'No discussions yet' : `No discussions in ${categories.find(c => c.value === selectedCategory)?.label}`}
+                  </h3>
+                  <p className="text-muted-foreground mb-4">Be the first to start a discussion!</p>
+                  {user ? (
                     <Button onClick={() => setCreateDialogOpen(true)}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Create First Discussion
+                      Start Discussion
+                    </Button>
+                  ) : (
+                    <Button onClick={() => navigate('/auth')}>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign Up to Post
                     </Button>
                   )}
                 </Card>
               )}
             </div>
           </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-foreground mb-4">Featured Topics</h3>
-                <div className="flex flex-wrap gap-2">
-                  {featuredTopics.map((topic) => (
-                    <Badge key={topic} variant="secondary" className="cursor-pointer hover:bg-secondary/80">
-                      {topic}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-foreground mb-4">Forum Stats</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Discussions</span>
-                    <span className="font-medium">{discussions.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Pinned Topics</span>
-                    <span className="font-medium">{discussions.filter(d => d.is_pinned).length}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
+
+        {/* Discussion Detail Modal */}
+        <Dialog open={!!selectedDiscussion} onOpenChange={() => setSelectedDiscussion(null)}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            {selectedDiscussion && (
+              <>
+                <DialogHeader>
+                  <div className="flex items-center gap-2 mb-2">
+                    {selectedDiscussion.is_pinned && <Pin className="h-4 w-4 text-primary" />}
+                    {selectedDiscussion.is_important && <Lock className="h-4 w-4 text-orange-500" />}
+                    <Badge className={getCategoryColor(selectedDiscussion.category)}>
+                      {selectedDiscussion.category}
+                    </Badge>
+                  </div>
+                  <DialogTitle className="text-xl">{selectedDiscussion.title}</DialogTitle>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  {/* Original Discussion */}
+                  <div className="border-b pb-6">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={selectedDiscussion.profiles?.avatar_url} />
+                        <AvatarFallback>
+                          {selectedDiscussion.profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {selectedDiscussion.profiles?.full_name || 'Anonymous'}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatTimeAgo(selectedDiscussion.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="prose prose-sm max-w-none">
+                      <p className="text-foreground whitespace-pre-wrap">{selectedDiscussion.content}</p>
+                    </div>
+                  </div>
+
+                  {/* Replies */}
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-foreground">
+                      Replies ({replies.length})
+                    </h4>
+                    
+                    {replies.map((reply) => (
+                      <div key={reply.id} className="border rounded-lg p-4">
+                        <div className="flex items-center space-x-3 mb-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={reply.profiles?.avatar_url} />
+                            <AvatarFallback>
+                              {reply.profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">
+                              {reply.profiles?.full_name || 'Anonymous'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatTimeAgo(reply.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-sm text-foreground whitespace-pre-wrap">{reply.content}</p>
+                      </div>
+                    ))}
+
+                    {replies.length === 0 && (
+                      <p className="text-center text-muted-foreground py-8">
+                        No replies yet. Be the first to reply!
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Reply Form */}
+                  {user && (
+                    <div className="border-t pt-6">
+                      <div className="space-y-3">
+                        <Textarea
+                          placeholder="Write your reply..."
+                          value={newReply}
+                          onChange={(e) => setNewReply(e.target.value)}
+                          rows={3}
+                        />
+                        <div className="flex justify-end">
+                          <Button 
+                            onClick={handleCreateReply}
+                            disabled={!newReply.trim()}
+                          >
+                            <Send className="h-4 w-4 mr-2" />
+                            Reply
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!user && (
+                    <div className="border-t pt-6 text-center">
+                      <p className="text-muted-foreground mb-4">
+                        You need to be logged in to reply to discussions.
+                      </p>
+                      <Button onClick={() => navigate('/auth')}>
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Sign In to Reply
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Edit Discussion Dialog */}
         <Dialog open={!!editingDiscussion} onOpenChange={() => setEditingDiscussion(null)}>
@@ -547,7 +811,7 @@ export default function Discuss() {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((cat) => (
+                    {categories.filter(cat => cat.value !== 'all').map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>
                         {cat.label}
                       </SelectItem>
