@@ -43,9 +43,9 @@ export default function Problems() {
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case "Easy": return "border-emerald-400 text-emerald-500 bg-emerald-500/10";
-      case "Medium": return "border-amber-400 text-amber-500 bg-amber-500/10";
-      case "Hard": return "border-red-400 text-red-500 bg-red-500/10";
+      case "Easy": return "border-emerald-400 text-emerald-600 dark:text-emerald-300 bg-emerald-500/10 group-hover:text-emerald-500 group-hover:bg-emerald-500/20 transition-colors duration-200";
+      case "Medium": return "border-amber-400 text-amber-600 dark:text-amber-300 bg-amber-500/10 group-hover:text-amber-500 group-hover:bg-amber-500/20 transition-colors duration-200";
+      case "Hard": return "border-red-400 text-red-600 dark:text-red-300 bg-red-500/10 group-hover:text-red-500 group-hover:bg-red-500/20 transition-colors duration-200";
       default: return "border-border text-muted-foreground";
     }
   };
@@ -175,7 +175,7 @@ export default function Problems() {
                   <TableCell>
                     <Badge 
                       variant="outline" 
-                      className={`${getDifficultyColor(problem.difficulty)} group-hover:shadow-[0_0_8px_rgba(255,255,255,0.2)] transition-all duration-200 border`}
+                      className={`${getDifficultyColor(problem.difficulty)} group-hover:shadow-[0_0_8px_rgba(255,255,255,0.2)] border cursor-pointer`}
                     >
                       {problem.difficulty}
                     </Badge>
@@ -186,7 +186,16 @@ export default function Problems() {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span className="text-muted-foreground group-hover:text-card-foreground transition-colors">
+                    <span
+                      className={`font-semibold px-2 py-1 rounded transition-colors duration-200
+                        ${problem.acceptanceRate >= 70
+                          ? 'text-emerald-600 dark:text-emerald-300 bg-emerald-500/10'
+                          : problem.acceptanceRate >= 40
+                          ? 'text-amber-600 dark:text-amber-300 bg-amber-500/10'
+                          : 'text-red-600 dark:text-red-300 bg-red-500/10'}
+                        group-hover:bg-opacity-30 group-hover:shadow-md
+                      `}
+                    >
                       {problem.acceptanceRate}%
                     </span>
                   </TableCell>
