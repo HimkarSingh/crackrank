@@ -133,29 +133,82 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           full_name: string | null
           id: string
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           full_name?: string | null
           id?: string
           updated_at?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: []
+      }
+      submissions: {
+        Row: {
+          code: string
+          created_at: string | null
+          error: string | null
+          id: string
+          language: string
+          output: string | null
+          passed: boolean | null
+          problem_id: string
+          testcases: Json | null
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          error?: string | null
+          id?: string
+          language: string
+          output?: string | null
+          passed?: boolean | null
+          problem_id: string
+          testcases?: Json | null
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          error?: string | null
+          id?: string
+          language?: string
+          output?: string | null
+          passed?: boolean | null
+          problem_id?: string
+          testcases?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "problems"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

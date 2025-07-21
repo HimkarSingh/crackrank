@@ -119,13 +119,13 @@ export default function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/settings" className="w-full cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
+                      <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to="/help" className="w-full cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
+                      <HelpCircle className="mr-2 h-4 w-4" />
                       <span>Help Center</span>
                     </Link>
                   </DropdownMenuItem>
