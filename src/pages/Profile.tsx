@@ -73,7 +73,7 @@ export default function Profile() {
     }
 
     if (data) {
-      setProfile(data);
+      setProfile(data as ProfileData);
       setFormData({
         full_name: data.full_name || '',
         username: data.username || '',
@@ -85,24 +85,32 @@ export default function Profile() {
   const fetchStats = async () => {
     if (!user) return;
 
-    // Fetch user statistics from various tables - simplified to avoid type errors
-    const problemsSolved = 0; // Placeholder since submissions table doesn't exist in types
-    const discussionsCreated = 0; // Will be implemented when we need it
-    const totalLikes = 0; // Placeholder
+    try {
+      // Fetch discussions created by user
+      const { data: discussionsData } = await supabase
+        .from('discussions')
+        .select('likes_count')
+        .eq('author_id', user.id);
 
-    // Calculate rank based on problems solved
-    let rank = 'Beginner';
-    if (problemsSolved >= 50) rank = 'Expert';
-    else if (problemsSolved >= 20) rank = 'Advanced';
-    else if (problemsSolved >= 5) rank = 'Intermediate';
+      const discussionsCreated = discussionsData?.length || 0;
+      const totalLikes = discussionsData?.reduce((sum, d) => sum + d.likes_count, 0) || 0;
 
-    setStats({
-      problems_solved: problemsSolved,
-      discussions_created: discussionsCreated,
-      total_likes: totalLikes,
-      streak: Math.floor(Math.random() * 30), // Placeholder for streak calculation
-      rank
-    });
+      // Calculate rank based on activity (simplified for now)
+      let rank = 'Beginner';
+      if (discussionsCreated >= 10) rank = 'Expert';
+      else if (discussionsCreated >= 5) rank = 'Advanced';
+      else if (discussionsCreated >= 2) rank = 'Intermediate';
+
+      setStats({
+        problems_solved: 0, // Placeholder since submissions table isn't in current schema
+        discussions_created: discussionsCreated,
+        total_likes: totalLikes,
+        streak: Math.floor(Math.random() * 15) + 1, // Placeholder for streak calculation
+        rank
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
   };
 
   const handleSave = async () => {
@@ -174,36 +182,44 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}.${fileExt}`;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}.${fileExt}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(fileName, file, { upsert: true });
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
 
-    if (uploadError) {
+      if (uploadError) {
+        toast({
+          title: "Error",
+          description: "Failed to upload image",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      await supabase
+        .from('profiles')
+        .update({ avatar_url: data.publicUrl })
+        .eq('user_id', user.id);
+
+      fetchProfile();
+      toast({
+        title: "Success",
+        description: "Profile picture updated"
+      });
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to upload image",
         variant: "destructive"
       });
-      return;
     }
-
-    const { data } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(fileName);
-
-    await supabase
-      .from('profiles')
-      .update({ avatar_url: data.publicUrl })
-      .eq('user_id', user.id);
-
-    fetchProfile();
-    toast({
-      title: "Success",
-      description: "Profile picture updated"
-    });
   };
 
   if (!user) {
@@ -355,20 +371,20 @@ export default function Profile() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm">Solved "Two Sum" problem</span>
-                <span className="text-xs text-muted-foreground ml-auto">2 hours ago</span>
+                <span className="text-sm">Joined CrackRank community</span>
+                <span className="text-xs text-muted-foreground ml-auto">Recently</span>
               </div>
               <Separator />
               <div className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="text-sm">Created discussion "Best practices for arrays"</span>
-                <span className="text-xs text-muted-foreground ml-auto">1 day ago</span>
+                <span className="text-sm">Updated profile information</span>
+                <span className="text-xs text-muted-foreground ml-auto">Today</span>
               </div>
               <Separator />
               <div className="flex items-center space-x-3">
                 <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                <span className="text-sm">Achieved 7-day streak</span>
-                <span className="text-xs text-muted-foreground ml-auto">3 days ago</span>
+                <span className="text-sm">Exploring discussions</span>
+                <span className="text-xs text-muted-foreground ml-auto">Today</span>
               </div>
             </div>
           </CardContent>
