@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Code, User, Moon, Sun, LogOut, UserPlus } from "lucide-react";
+import { Code, User, Moon, Sun, LogOut, UserPlus, Settings, HelpCircle } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -110,6 +110,24 @@ export default function Navbar() {
                   <DropdownMenuItem className="flex-col items-start">
                     <div className="font-medium">{user.user_metadata?.full_name || 'User'}</div>
                     <div className="text-xs text-muted-foreground">{user.email}</div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="w-full cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" className="w-full cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/help" className="w-full cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Help Center</span>
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
                     <LogOut className="mr-2 h-4 w-4" />
