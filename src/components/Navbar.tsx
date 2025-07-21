@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Code, User, Moon, Sun, LogOut } from "lucide-react";
+import { Code, User, Moon, Sun, LogOut, UserPlus } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -118,26 +118,32 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  asChild
-                  className="font-inter bg-transparent border-border text-foreground hover:bg-accent hover:text-foreground hover:border-primary/40 transition-all duration-200 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]"
-                >
-                  <Link to="/auth">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="font-inter bg-transparent border-border text-foreground hover:bg-accent hover:text-foreground hover:border-primary/40 transition-all duration-200 drop-shadow-[0_0_8px_rgba(255,255,255,0.1)] hover:drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]"
+                  >
                     <User className="h-4 w-4 mr-2" />
                     Login
-                  </Link>
-                </Button>
-                <Button 
-                  size="sm" 
-                  asChild
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-inter transition-all duration-200 drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:scale-105"
-                >
-                  <Link to="/auth">Sign Up</Link>
-                </Button>
-              </>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-40" align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/auth" className="w-full cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Sign In</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/auth" className="w-full cursor-pointer">
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      <span>Sign Up</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
