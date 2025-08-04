@@ -94,6 +94,7 @@ export default function Discuss() {
 
   const fetchDiscussions = async () => {
     try {
+      // First get discussions and unique author IDs
       const { data: discussionsData, error: discussionsError } = await supabase
         .from('discussions')
         .select('*')
@@ -102,20 +103,30 @@ export default function Discuss() {
 
       if (discussionsError) throw discussionsError;
 
-      const discussionsWithProfiles = await Promise.all(
-        (discussionsData || []).map(async (discussion) => {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('full_name, avatar_url')
-            .eq('user_id', discussion.author_id)
-            .single();
+      if (!discussionsData || discussionsData.length === 0) {
+        setDiscussions([]);
+        return;
+      }
 
-          return {
-            ...discussion,
-            profiles: profileData
-          };
-        })
+      // Get unique author IDs to reduce profile queries
+      const authorIds = [...new Set(discussionsData.map(d => d.author_id))];
+      
+      // Fetch all profiles in a single query
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', authorIds);
+
+      // Create a map for quick profile lookup
+      const profilesMap = new Map(
+        (profilesData || []).map(profile => [profile.user_id, profile])
       );
+
+      // Combine discussions with profiles
+      const discussionsWithProfiles = discussionsData.map(discussion => ({
+        ...discussion,
+        profiles: profilesMap.get(discussion.author_id) || null
+      }));
 
       setDiscussions(discussionsWithProfiles);
     } catch (error) {
@@ -132,6 +143,7 @@ export default function Discuss() {
 
   const fetchReplies = async (discussionId: string) => {
     try {
+      // Get replies first
       const { data: repliesData, error: repliesError } = await supabase
         .from('discussion_replies')
         .select('*')
@@ -140,20 +152,30 @@ export default function Discuss() {
 
       if (repliesError) throw repliesError;
 
-      const repliesWithProfiles = await Promise.all(
-        (repliesData || []).map(async (reply) => {
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('full_name, avatar_url')
-            .eq('user_id', reply.author_id)
-            .single();
+      if (!repliesData || repliesData.length === 0) {
+        setReplies([]);
+        return;
+      }
 
-          return {
-            ...reply,
-            profiles: profileData
-          };
-        })
+      // Get unique author IDs to reduce profile queries
+      const authorIds = [...new Set(repliesData.map(r => r.author_id))];
+      
+      // Fetch all profiles in a single query
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', authorIds);
+
+      // Create a map for quick profile lookup
+      const profilesMap = new Map(
+        (profilesData || []).map(profile => [profile.user_id, profile])
       );
+
+      // Combine replies with profiles
+      const repliesWithProfiles = repliesData.map(reply => ({
+        ...reply,
+        profiles: profilesMap.get(reply.author_id) || null
+      }));
 
       setReplies(repliesWithProfiles);
     } catch (error) {
