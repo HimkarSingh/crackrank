@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -49,6 +50,7 @@ interface Discussion {
 }
 
 export default function Admin() {
+  const { user } = useAuth();
   const [problems, setProblems] = useState<Problem[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
@@ -214,6 +216,33 @@ export default function Admin() {
   };
 
   const toggleUserRole = async (userId: string, currentRole: string) => {
+    // Additional security check: verify current user is admin
+    const { data: currentUserRole, error: roleCheckError } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user?.id)
+      .eq('role', 'admin')
+      .single();
+
+    if (roleCheckError || !currentUserRole) {
+      toast({
+        title: "Error",
+        description: "Unauthorized: Admin access required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prevent users from removing their own admin role
+    if (userId === user?.id && currentRole === 'admin') {
+      toast({
+        title: "Error",
+        description: "Cannot remove your own admin privileges",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     
     try {
