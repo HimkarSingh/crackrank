@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Code, Users, TrendingUp, CheckCircle, ArrowRight, Target, BookOpen, MessageSquare, Zap, Star, Brain } from "lucide-react";
+import PricingSection from "@/components/PricingSection";
 
 export default function Index() {
   const features = [
@@ -192,6 +193,9 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* Pricing Section */}
+      <PricingSection />
 
       {/* CTA Section */}
       <section className="py-24 bg-background relative overflow-hidden">

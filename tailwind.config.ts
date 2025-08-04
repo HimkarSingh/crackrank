@@ -69,6 +69,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				premium: {
+					gold: 'hsl(var(--premium-gold))',
+					'gold-light': 'hsl(var(--premium-gold-light))',
+					silver: 'hsl(var(--premium-silver))',
+					bronze: 'hsl(var(--premium-bronze))'
+				},
+				earning: {
+					green: 'hsl(var(--earning-green))',
+					blue: 'hsl(var(--earning-blue))'
+				},
+				crypto: {
+					orange: 'hsl(var(--crypto-orange))'
 				}
 			},
 			borderRadius: {

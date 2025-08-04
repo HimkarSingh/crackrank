@@ -44,6 +44,17 @@
     --sidebar-accent-foreground: 0 0% 10%;
     --sidebar-border: 0 0% 90%;
     --sidebar-ring: 0 0% 10%;
+
+    /* Premium color gradients */
+    --premium-gold: 43 74% 66%;
+    --premium-gold-light: 43 74% 80%;
+    --premium-silver: 0 0% 75%;
+    --premium-bronze: 25 45% 55%;
+    
+    /* Earning colors */
+    --earning-green: 142 76% 36%;
+    --earning-blue: 221 83% 53%;
+    --crypto-orange: 25 95% 53%;
   }
 
   .dark {
@@ -83,6 +94,17 @@
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 20%;
     --sidebar-ring: 0 0% 98%;
+
+    /* Premium color gradients - dark mode */
+    --premium-gold: 43 74% 66%;
+    --premium-gold-light: 43 74% 80%;
+    --premium-silver: 0 0% 75%;
+    --premium-bronze: 25 45% 55%;
+    
+    /* Earning colors - dark mode */
+    --earning-green: 142 76% 36%;
+    --earning-blue: 221 83% 53%;
+    --crypto-orange: 25 95% 53%;
   }
 }
 
