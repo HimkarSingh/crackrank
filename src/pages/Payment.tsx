@@ -75,8 +75,7 @@ const cryptoOptions = [
   { symbol: 'BTC', name: 'Bitcoin', rate: 0.0000120, wallet: 'bc1qvvhq4k6j6yc37tnenm377ul277t7zld5g5gqlu' },
   { symbol: 'ETH', name: 'Ethereum', rate: 0.000185, wallet: '0x2FBAA46F9A433d2640042cA1a3590f8E6FdFb04d' },
   { symbol: 'SOL', name: 'Solana', rate:0.0001 , wallet: '4FAVBZFwb9WdBrgnf4mH5UdSuhZW3En6t8qripkfThBG' },
-  { symbol: 'USDT', name: 'Tether', rate: 0.012, wallet: '0xa31eE866e304100E4BcEBf0eDAC0b8f3476A13c8' },
-  { symbol: 'BNB', name: 'Binance Coin', rate: 0.00008, wallet: '0xa31eE866e304100E4BcEBf0eDAC0b8f3476A13c8' }
+  { symbol: 'ETH', name: 'MetaMask', rate: 0.012, wallet: '0xa31eE866e304100E4BcEBf0eDAC0b8f3476A13c8' }
 ];
 
 export default function Payment() {
