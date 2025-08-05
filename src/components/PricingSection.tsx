@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, Crown, Zap, Star, TrendingUp, Coins, Upload, BarChart3 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Check, Crown, Zap, Star, TrendingUp, Coins, Upload, BarChart3, Info, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
@@ -13,16 +14,21 @@ const plans = [
     price: '₹0',
     period: '/month',
     description: 'Perfect for getting started',
+    shortFeatures: [
+      '10 coding problems',
+      'Basic difficulty levels',
+      'Community access'
+    ],
     features: [
       'Access to 10 coding problems',
-      'Basic difficulty levels',
+      'Basic difficulty levels', 
       'Community discussions (view only)',
       'Standard support',
       'Ads supported'
     ],
     limitations: [
       'No question upload',
-      'No earning opportunities',
+      'No earning opportunities', 
       'Limited to basic problems',
       'Ads displayed'
     ],
@@ -36,6 +42,12 @@ const plans = [
     price: '₹500',
     period: '/month',
     description: 'Unlock exclusive content & earnings',
+    shortFeatures: [
+      '50+ premium problems',
+      'Upload 5 questions/month',
+      'Earn crypto rewards',
+      'Ad-free experience'
+    ],
     features: [
       'Access to 50+ premium problems',
       'Multi-language solutions (5 languages)',
@@ -55,10 +67,16 @@ const plans = [
     price: '₹1,000',
     period: '/month',
     description: 'Full access with analytics',
+    shortFeatures: [
+      '100+ exclusive problems',
+      'Upload 15 questions/month',
+      'Premium analytics',
+      'Priority chat support'
+    ],
     features: [
       'Access to 100+ exclusive problems',
       'Multi-language solutions (10+ languages)',
-      'Upload up to 15 questions/month',
+      'Upload up to 15 questions/month', 
       'Enhanced earning opportunities',
       'Premium dashboard with analytics',
       'Priority chat support',
@@ -75,6 +93,12 @@ const plans = [
     price: '₹2,000',
     period: '/month',
     description: 'Complete access & unlimited earnings',
+    shortFeatures: [
+      'Unlimited access',
+      'Unlimited uploads',
+      'Advanced analytics',
+      '24/7 priority support'
+    ],
     features: [
       'Unlimited access to all problems',
       'Multi-language solutions (15+ languages)',
@@ -98,6 +122,7 @@ export default function PricingSection() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
 
   const handlePlanSelect = (planName: string) => {
     if (!user) {
@@ -165,34 +190,89 @@ export default function PricingSection() {
               
               <CardContent className="space-y-6">
                 <div className="space-y-3">
-                  {plan.features.map((feature, featureIndex) => (
+                  {plan.shortFeatures.map((feature, featureIndex) => (
                     <div key={featureIndex} className="flex items-start space-x-3">
-                      <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-primary mt-1 flex-shrink-0" />
                       <span className="text-card-foreground text-sm">{feature}</span>
                     </div>
                   ))}
                 </div>
 
-                {plan.limitations.length > 0 && (
-                  <div className="pt-4 border-t border-border/30">
-                    <h4 className="text-muted-foreground text-xs font-medium mb-2 uppercase tracking-wider">Limitations</h4>
-                    <div className="space-y-2">
-                      {plan.limitations.map((limitation, limitIndex) => (
-                        <div key={limitIndex} className="flex items-start space-x-3">
-                          <div className="h-5 w-5 mt-0.5 flex-shrink-0 flex items-center justify-center">
-                            <div className="h-2 w-2 bg-muted-foreground/50 rounded-full"></div>
-                          </div>
-                          <span className="text-muted-foreground text-sm">{limitation}</span>
+                <Dialog open={openDialog === plan.name} onOpenChange={(open) => setOpenDialog(open ? plan.name : null)}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-full text-primary hover:text-primary">
+                      <Info className="h-4 w-4 mr-2" />
+                      View Full Details
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-3 text-2xl">
+                        <div className="p-2 rounded-full bg-accent/20 border border-border">
+                          {plan.icon}
                         </div>
-                      ))}
+                        {plan.name} Plan Details
+                      </DialogTitle>
+                    </DialogHeader>
+                    
+                    <div className="space-y-6">
+                      <div className="text-center p-6 bg-accent/10 rounded-lg">
+                        <div className="text-4xl font-bold text-foreground mb-2">
+                          {plan.price}
+                          <span className="text-lg text-muted-foreground font-normal">{plan.period}</span>
+                        </div>
+                        <p className="text-muted-foreground">{plan.description}</p>
+                      </div>
+
+                      <div>
+                        <h4 className="text-lg font-semibold mb-4 text-foreground">All Features Included</h4>
+                        <div className="space-y-3">
+                          {plan.features.map((feature, featureIndex) => (
+                            <div key={featureIndex} className="flex items-start space-x-3">
+                              <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                              <span className="text-card-foreground">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {plan.limitations.length > 0 && (
+                        <div>
+                          <h4 className="text-lg font-semibold mb-4 text-muted-foreground">Limitations</h4>
+                          <div className="space-y-3">
+                            {plan.limitations.map((limitation, limitIndex) => (
+                              <div key={limitIndex} className="flex items-start space-x-3">
+                                <X className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <span className="text-muted-foreground">{limitation}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <Button 
+                        onClick={() => {
+                          setOpenDialog(null);
+                          handlePlanSelect(plan.name);
+                        }}
+                        variant={plan.buttonVariant}
+                        className={`w-full ${
+                          plan.popular 
+                            ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
+                            : ''
+                        }`}
+                        disabled={selectedPlan === plan.name}
+                      >
+                        {selectedPlan === plan.name ? 'Selected' : plan.buttonText}
+                      </Button>
                     </div>
-                  </div>
-                )}
+                  </DialogContent>
+                </Dialog>
 
                 <Button 
                   onClick={() => handlePlanSelect(plan.name)}
                   variant={plan.buttonVariant}
-                  className={`w-full mt-6 ${
+                  className={`w-full ${
                     plan.popular 
                       ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_rgba(255,255,255,0.2)]' 
                       : ''
