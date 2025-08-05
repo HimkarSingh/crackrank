@@ -205,7 +205,7 @@ export default function PricingSection() {
                       View Full Details
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto" aria-describedby="plan-description">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-3 text-2xl">
                         <div className="p-2 rounded-full bg-accent/20 border border-border">
@@ -213,6 +213,7 @@ export default function PricingSection() {
                         </div>
                         {plan.name} Plan Details
                       </DialogTitle>
+                      <div id="plan-description" className="text-muted-foreground">{plan.description}</div>
                     </DialogHeader>
                     
                     <div className="space-y-6">

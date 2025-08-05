@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,7 +72,7 @@ export default function Discuss() {
     'Code Review'
   ];
 
-  const categories = [
+  const categories = useMemo(() => [
     { value: 'all', label: 'All Categories', count: discussions.length, icon: TrendingUp },
     { value: 'general', label: 'General Discussion', count: discussions.filter(d => d.category === 'general').length, icon: MessageSquare },
     { value: 'algorithms', label: 'Algorithms', count: discussions.filter(d => d.category === 'algorithms').length, icon: TrendingUp },
@@ -80,7 +80,7 @@ export default function Discuss() {
     { value: 'contests', label: 'Contests', count: discussions.filter(d => d.category === 'contests').length, icon: TrendingUp },
     { value: 'announcements', label: 'Announcements', count: discussions.filter(d => d.category === 'announcements').length, icon: Pin },
     { value: 'help', label: 'Help & Support', count: discussions.filter(d => d.category === 'help').length, icon: Heart }
-  ];
+  ], [discussions]);
 
   useEffect(() => {
     fetchDiscussions();
@@ -92,7 +92,7 @@ export default function Discuss() {
     }
   }, [selectedDiscussion]);
 
-  const fetchDiscussions = async () => {
+  const fetchDiscussions = useCallback(async () => {
     try {
       // First get discussions and unique author IDs
       const { data: discussionsData, error: discussionsError } = await supabase
@@ -139,9 +139,9 @@ export default function Discuss() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const fetchReplies = async (discussionId: string) => {
+  const fetchReplies = useCallback(async (discussionId: string) => {
     try {
       // Get replies first
       const { data: repliesData, error: repliesError } = await supabase
@@ -181,7 +181,7 @@ export default function Discuss() {
     } catch (error) {
       console.error('Error fetching replies:', error);
     }
-  };
+  }, []);
 
   const handleCreateDiscussion = async () => {
     if (!user) {
@@ -393,9 +393,12 @@ export default function Discuss() {
     return user && ((discussion.author_id === user.id && !discussion.is_important) || isAdmin);
   };
 
-  const filteredDiscussions = selectedCategory === 'all' 
-    ? discussions 
-    : discussions.filter(d => d.category === selectedCategory);
+  const filteredDiscussions = useMemo(() => 
+    selectedCategory === 'all' 
+      ? discussions 
+      : discussions.filter(d => d.category === selectedCategory),
+    [discussions, selectedCategory]
+  );
 
   if (loading) {
     return (
