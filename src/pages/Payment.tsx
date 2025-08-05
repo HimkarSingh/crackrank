@@ -72,10 +72,11 @@ const planDetails = {
 };
 
 const cryptoOptions = [
-  { symbol: 'BTC', name: 'Bitcoin', rate: 0.0000120, wallet: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh' },
-  { symbol: 'ETH', name: 'Ethereum', rate: 0.000185, wallet: '0x742d35cc6636c0532925a3b8d5c9c55b9f4f9200' },
-  { symbol: 'USDT', name: 'Tether', rate: 0.012, wallet: 'TQrZ8t4s71pUBrgLgMD5M8LPkLLxWN6pXh' },
-  { symbol: 'BNB', name: 'Binance Coin', rate: 0.00008, wallet: 'bnb136ns6lfw4zs5hg4n85vdthaad7hq5m4gtkgf23' }
+  { symbol: 'BTC', name: 'Bitcoin', rate: 0.0000120, wallet: 'bc1qvvhq4k6j6yc37tnenm377ul277t7zld5g5gqlu' },
+  { symbol: 'ETH', name: 'Ethereum', rate: 0.000185, wallet: '0x2FBAA46F9A433d2640042cA1a3590f8E6FdFb04d' },
+  { symbol: 'SOL', name: 'Solana', rate:0.0001 , wallet: '4FAVBZFwb9WdBrgnf4mH5UdSuhZW3En6t8qripkfThBG' },
+  { symbol: 'USDT', name: 'Tether', rate: 0.012, wallet: '0xa31eE866e304100E4BcEBf0eDAC0b8f3476A13c8' },
+  { symbol: 'BNB', name: 'Binance Coin', rate: 0.00008, wallet: '0xa31eE866e304100E4BcEBf0eDAC0b8f3476A13c8' }
 ];
 
 export default function Payment() {
