@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Check, Crown, Zap, Star, TrendingUp, Coins, Upload, BarChart3, Info, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const plans = [
   {
@@ -121,6 +121,7 @@ const plans = [
 export default function PricingSection() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState<string | null>(null);
 
@@ -144,8 +145,8 @@ export default function PricingSection() {
       return;
     }
 
-    // For premium plans, redirect to payment page
-    window.location.href = `/payment?plan=${planName.toLowerCase()}`;
+    // For premium plans, navigate to payment page
+    navigate(`/payment?plan=${planName.toLowerCase()}`);
   };
 
   return (
