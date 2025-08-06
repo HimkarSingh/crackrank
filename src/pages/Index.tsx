@@ -52,30 +52,30 @@ export default function Index() {
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"></div>
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-5xl mx-auto px-8 sm:px-12 lg:px-16">
           <div className="text-center">
-            <div className="flex justify-center mb-6">
-              <div className="flex items-center space-x-2 bg-card/50 backdrop-blur-sm rounded-full px-6 py-2 border border-border shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                <Zap className="h-5 w-5 text-primary drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
-                <span className="text-sm font-medium text-foreground">Level up your coding skills</span>
+            <div className="flex justify-center mb-4">
+              <div className="flex items-center space-x-2 bg-card/50 backdrop-blur-sm rounded-full px-4 py-1.5 border border-border shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                <Zap className="h-4 w-4 text-primary drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
+                <span className="text-xs font-medium text-foreground">Level up your coding skills</span>
               </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-foreground drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 text-foreground drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
               Ace Your <span className="text-primary drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] animate-pulse">Coding Interviews</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-10 text-muted-foreground max-w-4xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg mb-8 text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               The all-in-one platform to master Data Structures & Algorithms with curated problems, 
               progress tracking, and community support.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/problems">
-                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 border-0 text-lg px-10 py-4 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] transform hover:scale-105 transition-all duration-200 font-semibold">
+                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 border-0 text-sm px-6 py-3 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] transform hover:scale-105 transition-all duration-200 font-semibold">
                   Start Practicing
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link to="/dashboard">
-                <Button size="lg" variant="outline" className="border-2 border-border text-foreground bg-transparent hover:bg-accent hover:text-foreground backdrop-blur-sm text-lg px-10 py-4 rounded-xl transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                <Button size="lg" variant="outline" className="border-2 border-border text-foreground bg-transparent hover:bg-accent hover:text-foreground backdrop-blur-sm text-sm px-6 py-3 rounded-xl transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
                   View Dashboard
                 </Button>
               </Link>
@@ -97,13 +97,13 @@ export default function Index() {
 
 
       {/* Features Section */}
-      <section className="py-24 bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+      <section className="py-16 bg-background border-b border-border">
+        <div className="max-w-5xl mx-auto px-8 sm:px-12 lg:px-16">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
               Everything You Need to Succeed
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Comprehensive tools and resources designed to help you crack any coding interview
             </p>
           </div>
@@ -117,10 +117,10 @@ export default function Index() {
                       {feature.icon}
                     </div>
                   </div>
-                  <CardTitle className="text-xl text-card-foreground">{feature.title}</CardTitle>
+                  <CardTitle className="text-base text-card-foreground">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground text-center leading-relaxed">{feature.description}</p>
+                  <p className="text-muted-foreground text-center text-sm leading-relaxed">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -129,13 +129,13 @@ export default function Index() {
       </section>
 
       {/* Popular Problems Preview */}
-      <section className="py-24 bg-accent/5 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+      <section className="py-16 bg-accent/5 border-b border-border">
+        <div className="max-w-5xl mx-auto px-8 sm:px-12 lg:px-16">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
               Popular Problems
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Start with these frequently asked interview questions
             </p>
           </div>
@@ -144,15 +144,15 @@ export default function Index() {
             {recentProblems.map((problem) => (
               <Card key={problem.id} className="bg-card/50 border-border/50 hover:border-primary/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.08)] backdrop-blur-sm group hover:scale-105">
                 <CardContent className="p-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-semibold text-xl text-card-foreground group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-all">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-base text-card-foreground group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] transition-all">
                       {problem.title}
                     </h3>
-                    <Badge className={`${getDifficultyColor(problem.difficulty)} font-medium px-3 py-1 border`}>
+                    <Badge className={`${getDifficultyColor(problem.difficulty)} font-medium px-2 py-0.5 text-xs border`}>
                       {problem.difficulty}
                     </Badge>
                   </div>
-                  <p className="text-muted-foreground text-sm mb-4">{problem.description}</p>
+                  <p className="text-muted-foreground text-xs mb-3">{problem.description}</p>
                   <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <span className="bg-accent/30 border border-border px-3 py-1 rounded-full">#{problem.id}</span>
                     <span className="text-card-foreground font-medium">{problem.acceptance}% acceptance</span>
@@ -164,8 +164,8 @@ export default function Index() {
 
           <div className="text-center">
             <Link to="/problems">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-10 py-4 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.1)] transform hover:scale-105 transition-all duration-200 font-semibold">
-                <BookOpen className="mr-3 h-6 w-6" />
+              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm px-6 py-3 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.1)] transform hover:scale-105 transition-all duration-200 font-semibold">
+                <BookOpen className="mr-2 h-4 w-4" />
                 View All Problems
               </Button>
             </Link>
@@ -177,26 +177,26 @@ export default function Index() {
       <PricingSection />
 
       {/* CTA Section */}
-      <section className="py-24 bg-background relative overflow-hidden">
+      <section className="py-16 bg-background relative overflow-hidden">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/10 to-primary/5"></div>
         </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8 text-foreground drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+        <div className="relative max-w-5xl mx-auto px-8 sm:px-12 lg:px-16 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-foreground drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
             Ready to Land Your Dream Job?
           </h2>
-          <p className="text-xl mb-12 text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm mb-8 text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Join thousands of developers who have successfully prepared for their coding interviews with CrackRank
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/auth">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-10 py-4 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] transform hover:scale-105 transition-all duration-200 font-semibold">
+              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm px-6 py-3 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.2)] transform hover:scale-105 transition-all duration-200 font-semibold">
                 Get Started Free
               </Button>
             </Link>
             <Link to="/discuss">
-              <Button size="lg" variant="outline" className="border-2 border-border text-foreground bg-transparent hover:bg-accent hover:text-foreground backdrop-blur-sm text-lg px-10 py-4 rounded-xl transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
-                <MessageSquare className="mr-3 h-6 w-6" />
+              <Button size="lg" variant="outline" className="border-2 border-border text-foreground bg-transparent hover:bg-accent hover:text-foreground backdrop-blur-sm text-sm px-6 py-3 rounded-xl transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+                <MessageSquare className="mr-2 h-4 w-4" />
                 Join Community
               </Button>
             </Link>
@@ -206,15 +206,15 @@ export default function Index() {
 
       {/* Footer */}
       <footer className="bg-card/30 border-t border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-5xl mx-auto px-8 sm:px-12 lg:px-16 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Company Info */}
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
-                <Brain className="h-8 w-8 text-primary" />
-                <h3 className="text-xl font-bold text-foreground">CrackRank</h3>
+                <Brain className="h-6 w-6 text-primary" />
+                <h3 className="text-lg font-bold text-foreground">CrackRank</h3>
               </div>
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-muted-foreground text-xs leading-relaxed">
                 Master coding interviews with curated problems, progress tracking, and community support. Your gateway to landing dream tech jobs.
               </p>
               <div className="flex space-x-4">
@@ -237,9 +237,9 @@ export default function Index() {
             </div>
 
             {/* Quick Links */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Platform</h3>
-              <ul className="space-y-2 text-sm">
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Platform</h3>
+              <ul className="space-y-1.5 text-xs">
                 <li><Link to="/problems" className="text-muted-foreground hover:text-primary transition-colors">Browse Problems</Link></li>
                 <li><Link to="/dashboard" className="text-muted-foreground hover:text-primary transition-colors">Dashboard</Link></li>
                 <li><Link to="/discuss" className="text-muted-foreground hover:text-primary transition-colors">Discussions</Link></li>
@@ -248,9 +248,9 @@ export default function Index() {
             </div>
 
             {/* Support */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Support</h3>
-              <ul className="space-y-2 text-sm">
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Support</h3>
+              <ul className="space-y-1.5 text-xs">
                 <li><Link to="/help" className="text-muted-foreground hover:text-primary transition-colors">Help Center</Link></li>
                 <li><a href="mailto:support@crackrank.com" className="text-muted-foreground hover:text-primary transition-colors">Contact Support</a></li>
                 <li><a href="mailto:feedback@crackrank.com" className="text-muted-foreground hover:text-primary transition-colors">Send Feedback</a></li>
@@ -259,9 +259,9 @@ export default function Index() {
             </div>
 
             {/* Legal */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Legal</h3>
-              <ul className="space-y-2 text-sm">
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Legal</h3>
+              <ul className="space-y-1.5 text-xs">
                 <li><Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>
                 <li><Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link></li>
                 <li><Link to="/cookies" className="text-muted-foreground hover:text-primary transition-colors">Cookie Policy</Link></li>
@@ -271,11 +271,11 @@ export default function Index() {
           </div>
 
           {/* Bottom Bar */}
-          <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <div className="text-sm text-muted-foreground mb-4 md:mb-0">
+          <div className="border-t border-border mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
+            <div className="text-xs text-muted-foreground mb-3 md:mb-0">
               © 2025 CrackRank. All rights reserved. Built for developers, by developers.
             </div>
-            <div className="flex items-center space-x-6 text-sm">
+            <div className="flex items-center space-x-4 text-xs">
               <span className="text-muted-foreground">Contact us:</span>
               <a href="mailto:hello@crackrank.com" className="text-primary hover:text-primary/80 transition-colors font-medium">
                 hello@crackrank.com
