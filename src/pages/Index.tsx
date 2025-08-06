@@ -29,12 +29,6 @@ export default function Index() {
     }
   ];
 
-  const stats = [
-    { number: "50+", label: "Curated Problems" },
-    { number: "95%", label: "Success Rate" },
-    { number: "500+", label: "Companies Hiring" },
-    { number: "24/7", label: "Support Available" }
-  ];
 
   const recentProblems = [
     { id: 1, title: "Two Sum", difficulty: "Easy", acceptance: 72, description: "Find two numbers that add up to target" },
@@ -101,21 +95,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-accent/5 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center group">
-                <div className="text-4xl md:text-5xl font-bold text-foreground mb-3 group-hover:scale-110 transition-transform duration-200 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                  {stat.number}
-                </div>
-                <div className="text-muted-foreground text-lg">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Features Section */}
       <section className="py-24 bg-background border-b border-border">
