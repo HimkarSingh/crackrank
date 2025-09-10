@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { ChevronLeft, Code, Check, ArrowUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import MonacoEditor from "@monaco-editor/react";
 import { useTheme } from "next-themes";
-import { executeCode } from "@/lib/judge0";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function ProblemDetail() {
   const { id } = useParams();
@@ -21,22 +21,24 @@ export default function ProblemDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [output, setOutput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [testResults, setTestResults] = useState<any[]>([]);
 
-  // Starter code templates for each language
-  const starterCode: Record<string, string> = {
-    python: `def solution(nums, target):\n    # Write your solution here\n    pass`,
-    javascript: `function solution(nums, target) {\n  // Write your solution here\n  return null;\n}`,
-    java: `public class Solution {\n    public int[] solution(int[] nums, int target) {\n        // Write your solution here\n        return new int[0];\n    }\n}`,
-    cpp: `#include <vector>\nusing namespace std;\n\nvector<int> solution(vector<int>& nums, int target) {\n    // Write your solution here\n    return {};\n}`
-  };
-
-  // Update code when language changes, but only if the code is still the default for the previous language
+  // Update code when language changes
   const handleLanguageChange = (newLang: string) => {
     setLanguage(newLang);
-    setCode(starterCode[newLang] || "");
+    if (problem?.starterCode) {
+      setCode(problem.starterCode[newLang as keyof typeof problem.starterCode] || "");
+    }
   };
 
   const problem = sampleProblems.find(p => p.id === parseInt(id || '0'));
+
+  // Initialize code with starter code when problem loads
+  useEffect(() => {
+    if (problem?.starterCode) {
+      setCode(problem.starterCode[language as keyof typeof problem.starterCode] || "");
+    }
+  }, [problem, language]);
 
   if (!problem) {
     return (
@@ -64,14 +66,27 @@ export default function ProblemDetail() {
     setIsSubmitting(true);
     setOutput(null);
     setError(null);
+    setTestResults([]);
+    
     try {
-      const result = await executeCode({ source_code: code, language });
-      if (result.stderr) {
-        setOutput(result.stderr);
-      } else if (result.compile_output) {
-        setOutput(result.compile_output);
+      const { data, error } = await supabase.functions.invoke('execute-code', {
+        body: { 
+          code, 
+          language,
+          input: problem?.examples[0]?.input.replace(/nums = /, '').replace(/, target = /, '\n') || ""
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data.stderr) {
+        setError(data.stderr);
+      } else if (data.compile_output) {
+        setError(data.compile_output);
       } else {
-        setOutput(result.stdout || "No output");
+        setOutput(data.stdout || "No output");
       }
     } catch (err: any) {
       setError(err.message || "Failed to execute code");
@@ -81,24 +96,51 @@ export default function ProblemDetail() {
   };
 
   const handleSubmit = async () => {
+    if (!problem) return;
+    
     setIsSubmitting(true);
     setOutput(null);
     setError(null);
+    setTestResults([]);
+    
     try {
-      const result = await executeCode({ source_code: code, language });
-      if (result.stderr) {
-        setOutput(result.stderr);
-        toast({ title: "Error", description: result.stderr, className: "bg-destructive text-white" });
-      } else if (result.compile_output) {
-        setOutput(result.compile_output);
-        toast({ title: "Compile Error", description: result.compile_output, className: "bg-destructive text-white" });
+      const { data, error } = await supabase.functions.invoke('submit-solution', {
+        body: { 
+          code, 
+          language,
+          problemId: problem.id,
+          testCases: problem.testCases
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setTestResults(data.testResults);
+      
+      if (data.passed) {
+        setOutput("All test cases passed! 🎉");
+        toast({ 
+          title: "Accepted!", 
+          description: data.message,
+          className: "bg-emerald-600 text-white border-emerald-700" 
+        });
       } else {
-        setOutput(result.stdout || "No output");
-        toast({ title: "Accepted!", description: "Your solution passed all test cases.", className: "bg-success text-white" });
+        setOutput(`${data.passedTests}/${data.totalTests} test cases passed`);
+        toast({ 
+          title: "Some tests failed", 
+          description: data.message,
+          className: "bg-amber-600 text-white border-amber-700" 
+        });
       }
     } catch (err: any) {
-      setError(err.message || "Failed to execute code");
-      toast({ title: "Error", description: err.message || "Failed to execute code", className: "bg-destructive text-white" });
+      setError(err.message || "Failed to submit code");
+      toast({ 
+        title: "Submission Error", 
+        description: err.message || "Failed to submit code",
+        className: "bg-destructive text-white" 
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -255,7 +297,7 @@ export default function ProblemDetail() {
                   onChange={(value) => setCode(value || "")}
                 />
                 {output && (
-                  <div className="mt-4 p-3 bg-gray-900 dark:bg-success/20 text-green-200 dark:text-success rounded font-mono text-sm whitespace-pre-wrap transition-colors duration-300">
+                  <div className="mt-4 p-3 bg-gray-900 dark:bg-emerald-950/30 text-green-200 dark:text-emerald-300 rounded font-mono text-sm whitespace-pre-wrap transition-colors duration-300">
                     <strong>Output:</strong>
                     <div>{output}</div>
                   </div>
@@ -264,6 +306,39 @@ export default function ProblemDetail() {
                   <div className="mt-4 p-3 bg-red-900 dark:bg-destructive/20 text-red-200 dark:text-destructive rounded font-mono text-sm whitespace-pre-wrap transition-colors duration-300">
                     <strong>Error:</strong>
                     <div>{error}</div>
+                  </div>
+                )}
+                
+                {/* Test Results */}
+                {testResults.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <strong className="text-sm">Test Results:</strong>
+                    {testResults.map((result, index) => (
+                      <div 
+                        key={index} 
+                        className={`p-3 rounded text-sm ${
+                          result.passed 
+                            ? 'bg-emerald-950/30 text-emerald-300 border border-emerald-700' 
+                            : 'bg-red-950/30 text-red-300 border border-red-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium">Test Case {result.testCase}</span>
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            result.passed ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
+                          }`}>
+                            {result.passed ? 'PASSED' : 'FAILED'}
+                          </span>
+                        </div>
+                        {!result.passed && (
+                          <div className="space-y-1 text-xs font-mono">
+                            <div><strong>Expected:</strong> {result.expected}</div>
+                            <div><strong>Actual:</strong> {result.actual || 'No output'}</div>
+                            {result.error && <div><strong>Error:</strong> {result.error}</div>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
                 
