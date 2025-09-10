@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Filter, X, CheckCircle, Circle, LogIn } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Filter, X, CheckCircle, Circle, LogIn, Target } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { sampleProblems, topics, companies } from "@/data/problems";
 
 export default function Problems() {
   const navigate = useNavigate();
@@ -16,19 +18,15 @@ export default function Problems() {
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [selectedTopic, setSelectedTopic] = useState("all");
 
-  // Mock data - in real app this would come from API
-  const problems = [
-    { id: 1, title: "Two Sum", difficulty: "Easy", topic: "Array", acceptanceRate: 72, solved: true },
-    { id: 2, title: "Add Two Numbers", difficulty: "Medium", topic: "Linked List", acceptanceRate: 45, solved: false },
-    { id: 3, title: "Longest Substring Without Repeating Characters", difficulty: "Medium", topic: "String", acceptanceRate: 38, solved: true },
-    { id: 4, title: "Median of Two Sorted Arrays", difficulty: "Hard", topic: "Array", acceptanceRate: 35, solved: false },
-    { id: 5, title: "Longest Palindromic Substring", difficulty: "Medium", topic: "String", acceptanceRate: 42, solved: false },
-    { id: 6, title: "ZigZag Conversion", difficulty: "Medium", topic: "String", acceptanceRate: 48, solved: true },
-    { id: 7, title: "Reverse Integer", difficulty: "Medium", topic: "Math", acceptanceRate: 28, solved: false },
-    { id: 8, title: "String to Integer (atoi)", difficulty: "Medium", topic: "String", acceptanceRate: 16, solved: false },
-    { id: 9, title: "Palindrome Number", difficulty: "Easy", topic: "Math", acceptanceRate: 56, solved: true },
-    { id: 10, title: "Regular Expression Matching", difficulty: "Hard", topic: "Dynamic Programming", acceptanceRate: 27, solved: false },
-  ];
+  // Use actual problems data from sampleProblems
+  const problems = sampleProblems.map(problem => ({
+    id: problem.id,
+    title: problem.title,
+    difficulty: problem.difficulty,
+    topic: problem.topics[0], // Use first topic as primary
+    acceptanceRate: problem.acceptance_rate,
+    solved: problem.solved || false
+  }));
 
   const filteredProblems = useMemo(() => {
     return problems.filter(problem => {
@@ -78,12 +76,23 @@ export default function Problems() {
         )}
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-            Coding Problems
-          </h1>
-          <p className="text-muted-foreground">
-            {user ? "Solve coding challenges to improve your interview skills" : "Explore our coding challenges - sign up to track your progress!"}
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                Coding Problems
+              </h1>
+              <p className="text-muted-foreground">
+                {user ? "Solve coding challenges to improve your interview skills" : "Explore our coding challenges - sign up to track your progress!"}
+              </p>
+            </div>
+            <Button 
+              onClick={() => navigate('/roadmap')} 
+              className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
+            >
+              <Target className="h-4 w-4 mr-2" />
+              Coding100 Roadmap
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
@@ -113,11 +122,9 @@ export default function Problems() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Topics</SelectItem>
-                  <SelectItem value="Array">Array</SelectItem>
-                  <SelectItem value="String">String</SelectItem>
-                  <SelectItem value="Dynamic Programming">Dynamic Programming</SelectItem>
-                  <SelectItem value="Tree">Tree</SelectItem>
-                  <SelectItem value="Graph">Graph</SelectItem>
+                  {topics.slice(0, 8).map(topic => (
+                    <SelectItem key={topic} value={topic}>{topic}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -146,9 +153,16 @@ export default function Problems() {
           </CardContent>
         </Card>
 
-        {/* Problems Table */}
-        <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
-          <Table>
+        {/* Problems Content */}
+        <Tabs defaultValue="all" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="all">All Problems</TabsTrigger>
+            <TabsTrigger value="roadmap">Roadmap Preview</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="all">
+            <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
+              <Table>
             <TableHeader>
               <TableRow className="border-border/50 hover:bg-accent/30">
                 <TableHead className="text-card-foreground">Problem</TableHead>
@@ -208,9 +222,29 @@ export default function Problems() {
                   </TableCell>
                 </TableRow>
               ))}
-            </TableBody>
-          </Table>
-        </Card>
+              </TableBody>
+            </Table>
+          </Card>
+          </TabsContent>
+          
+          <TabsContent value="roadmap">
+            <Card className="border border-border/50 bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="text-center py-8">
+                  <Target className="h-16 w-16 mx-auto mb-4 text-primary" />
+                  <h3 className="text-xl font-semibold mb-2">Coding100 Roadmap</h3>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                    Follow our structured learning path with carefully selected problems 
+                    arranged in optimal order for interview preparation.
+                  </p>
+                  <Button onClick={() => navigate('/roadmap')} size="lg">
+                    Start Your Journey
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         {filteredProblems.length === 0 && (
           <div className="text-center py-12">

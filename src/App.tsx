@@ -12,6 +12,7 @@ import AdminRoute from "./components/AdminRoute";
 import Index from "./pages/Index";
 import Problems from "./pages/Problems";
 import ProblemDetail from "./pages/ProblemDetail";
+import Roadmap from "./pages/Roadmap";
 import Dashboard from "./pages/Dashboard";
 import Discuss from "./pages/Discuss";
 import Auth from "./pages/Auth";
@@ -41,6 +42,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/problems" element={<Problems />} />
+                <Route path="/roadmap" element={<Roadmap />} />
                 <Route path="/problem/:id" element={<ProtectedRoute><ProblemDetail /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/discuss" element={<Discuss />} />
