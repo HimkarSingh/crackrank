@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,20 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 export default function ProblemDetail() {
   const { id } = useParams();
   const { toast } = useToast();
-  const [code, setCode] = useState(`def solution(nums, target):\n    # Write your solution here\n    pass`);
+  const [code, setCode] = useState("");
   const [language, setLanguage] = useState("python");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [output, setOutput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<any[]>([]);
-
-  // Update code when language changes
-  const handleLanguageChange = (newLang: string) => {
-    setLanguage(newLang);
-    if (problem?.starterCode) {
-      setCode(problem.starterCode[newLang as keyof typeof problem.starterCode] || "");
-    }
-  };
 
   const problem = sampleProblems.find(p => p.id === parseInt(id || '0'));
 
@@ -39,6 +30,30 @@ export default function ProblemDetail() {
       setCode(problem.starterCode[language as keyof typeof problem.starterCode] || "");
     }
   }, [problem, language]);
+
+  // Update code when language changes
+  const handleLanguageChange = (newLang: string) => {
+    setLanguage(newLang);
+    if (problem?.starterCode) {
+      setCode(problem.starterCode[newLang as keyof typeof problem.starterCode] || "");
+    }
+  };
+
+  const parseInput = (inputStr: string) => {
+    // Parse different input formats
+    if (inputStr.includes('nums = ') && inputStr.includes('target = ')) {
+      const nums = inputStr.match(/nums = (\[.*?\])/)?.[1] || '[]';
+      const target = inputStr.match(/target = (\d+)/)?.[1] || '0';
+      return `${nums}\n${target}`;
+    } else if (inputStr.includes('s = ')) {
+      const s = inputStr.match(/s = "(.*?)"/)?.[1] || '';
+      return s;
+    } else if (inputStr.includes('n = ')) {
+      const n = inputStr.match(/n = (\d+)/)?.[1] || '0';
+      return n;
+    }
+    return inputStr;
+  };
 
   if (!problem) {
     return (
@@ -69,11 +84,14 @@ export default function ProblemDetail() {
     setTestResults([]);
     
     try {
+      const firstExample = problem?.examples[0];
+      const input = firstExample ? parseInput(firstExample.input) : "";
+      
       const { data, error } = await supabase.functions.invoke('execute-code', {
         body: { 
           code, 
           language,
-          input: problem?.examples[0]?.input.replace(/nums = /, '').replace(/, target = /, '\n') || ""
+          input
         }
       });
 
@@ -99,17 +117,23 @@ export default function ProblemDetail() {
     if (!problem) return;
     
     setIsSubmitting(true);
+    setTestResults([]);
     setOutput(null);
     setError(null);
-    setTestResults([]);
     
     try {
+      // Transform test cases to proper format
+      const formattedTestCases = problem.testCases.map(tc => ({
+        ...tc,
+        input: parseInput(tc.input)
+      }));
+
       const { data, error } = await supabase.functions.invoke('submit-solution', {
         body: { 
           code, 
           language,
-          problemId: problem.id,
-          testCases: problem.testCases
+          problemId: problem.id.toString(),
+          testCases: formattedTestCases
         }
       });
 
@@ -117,29 +141,29 @@ export default function ProblemDetail() {
         throw new Error(error.message);
       }
 
-      setTestResults(data.testResults);
+      setTestResults(data.testResults || []);
       
       if (data.passed) {
-        setOutput("All test cases passed! 🎉");
-        toast({ 
-          title: "Accepted!", 
+        toast({
+          title: "Success!",
           description: data.message,
-          className: "bg-emerald-600 text-white border-emerald-700" 
+          duration: 5000,
         });
       } else {
-        setOutput(`${data.passedTests}/${data.totalTests} test cases passed`);
-        toast({ 
-          title: "Some tests failed", 
+        toast({
+          title: "Some tests failed",
           description: data.message,
-          className: "bg-amber-600 text-white border-amber-700" 
+          variant: "destructive",
+          duration: 5000,
         });
       }
     } catch (err: any) {
-      setError(err.message || "Failed to submit code");
-      toast({ 
-        title: "Submission Error", 
-        description: err.message || "Failed to submit code",
-        className: "bg-destructive text-white" 
+      setError(err.message || "Failed to submit solution");
+      toast({
+        title: "Submission failed",
+        description: err.message || "Please try again",
+        variant: "destructive",
+        duration: 5000,
       });
     } finally {
       setIsSubmitting(false);
@@ -167,107 +191,106 @@ export default function ProblemDetail() {
                 <Badge className={getDifficultyColor(problem.difficulty)}>
                   {problem.difficulty}
                 </Badge>
-                <span
-                  className={`ml-2 text-sm font-semibold px-2 py-1 rounded transition-colors duration-200
-                    ${problem.acceptance_rate >= 70
-                      ? 'text-emerald-600 dark:text-emerald-300 bg-emerald-500/10'
-                      : problem.acceptance_rate >= 40
-                      ? 'text-amber-600 dark:text-amber-300 bg-amber-500/10'
-                      : 'text-red-600 dark:text-red-300 bg-red-500/10'}
-                  `}
-                >
-                  {problem.acceptance_rate}% acceptance rate
+                <span className="text-sm text-gray-600 dark:text-gray-300">
+                  Acceptance: {problem.acceptance_rate}%
                 </span>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Problem Description */}
           <div className="space-y-6">
-            <Card>
+            <Card className="bg-card">
               <CardHeader>
-                <CardTitle>Description</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Code className="h-5 w-5 mr-2" />
+                  Problem Description
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none">
-                  <p className="whitespace-pre-wrap text-gray-700 dark:text-card-foreground transition-colors duration-300">{problem.description}</p>
+              <CardContent className="space-y-4">
+                <div className="prose prose-sm max-w-none dark:prose-invert">
+                  <p className="text-gray-700 dark:text-gray-200 whitespace-pre-line">
+                    {problem.description}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Examples</CardTitle>
-              </CardHeader>
-              <CardContent>
+                {/* Examples */}
                 <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-primary">Examples</h3>
                   {problem.examples.map((example, index) => (
-                    <div key={index} className="border rounded-lg p-4 bg-gray-50 dark:bg-card/80 transition-colors duration-300">
-                      <p className="font-medium text-sm text-gray-700 dark:text-card-foreground mb-2 transition-colors duration-300">Example {index + 1}:</p>
-                      <div className="space-y-1 text-sm">
-                        <p><strong>Input:</strong> {example.input}</p>
-                        <p><strong>Output:</strong> {example.output}</p>
+                    <div key={index} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                      <div className="space-y-2">
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-200">Input: </span>
+                          <code className="text-sm bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                            {example.input}
+                          </code>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-700 dark:text-gray-200">Output: </span>
+                          <code className="text-sm bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                            {example.output}
+                          </code>
+                        </div>
                         {example.explanation && (
-                          <p><strong>Explanation:</strong>  {example.explanation}</p>
+                          <div>
+                            <span className="font-medium text-gray-700 dark:text-gray-200">Explanation: </span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">
+                              {example.explanation}
+                            </span>
+                          </div>
                         )}
                       </div>
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Constraints</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="list-disc list-inside text-sm text-gray-700 dark:text-card-foreground space-y-1 transition-colors duration-300">
-                  {problem.constraints.map((constraint, index) => (
-                    <li key={index}>{constraint}</li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Company Tags</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {problem.companies.map(company => (
-                    <Badge key={company} variant="outline">{company}</Badge>
-                  ))}
+                {/* Constraints */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-primary mb-2">Constraints</h3>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-300">
+                    {problem.constraints.map((constraint, index) => (
+                      <li key={index}>{constraint}</li>
+                    ))}
+                  </ul>
                 </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Related Topics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {problem.topics.map(topic => (
-                    <Badge key={topic} variant="secondary">{topic}</Badge>
-                  ))}
+                {/* Topics */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-primary mb-2">Topics</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {problem.topics.map((topic, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Companies */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-primary mb-2">Companies</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {problem.companies.map((company, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {company}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Code Editor */}
-          <div className="space-y-4">
-            <Card>
+          {/* Code Editor and Results */}
+          <div className="space-y-6">
+            <Card className="bg-card">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center">
-                    <Code className="h-5 w-5 mr-2" />
-                    Code Editor
-                  </CardTitle>
+                  <CardTitle>Code Editor</CardTitle>
                   <Select value={language} onValueChange={handleLanguageChange}>
                     <SelectTrigger className="w-32">
                       <SelectValue />
@@ -282,79 +305,38 @@ export default function ProblemDetail() {
                 </div>
               </CardHeader>
               <CardContent>
-                <MonacoEditor
-                  height="500px"
-                  language={language === "cpp" ? "cpp" : language}
-                  value={code}
-                  theme={theme === "dark" ? "vs-dark" : "light"}
-                  options={{
-                    fontSize: 14,
-                    minimap: { enabled: false },
-                    readOnly: isSubmitting,
-                    fontFamily: 'Fira Mono, monospace',
-                    scrollBeyondLastLine: false,
-                  }}
-                  onChange={(value) => setCode(value || "")}
-                />
-                {output && (
-                  <div className="mt-4 p-3 bg-gray-900 dark:bg-emerald-950/30 text-green-200 dark:text-emerald-300 rounded font-mono text-sm whitespace-pre-wrap transition-colors duration-300">
-                    <strong>Output:</strong>
-                    <div>{output}</div>
-                  </div>
-                )}
-                {error && (
-                  <div className="mt-4 p-3 bg-red-900 dark:bg-destructive/20 text-red-200 dark:text-destructive rounded font-mono text-sm whitespace-pre-wrap transition-colors duration-300">
-                    <strong>Error:</strong>
-                    <div>{error}</div>
-                  </div>
-                )}
+                <div className="h-96 border border-border rounded-lg overflow-hidden">
+                  <MonacoEditor
+                    height="100%"
+                    language={language === 'cpp' ? 'cpp' : language}
+                    theme={theme === 'dark' ? 'vs-dark' : 'light'}
+                    value={code}
+                    onChange={(value) => setCode(value || "")}
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 14,
+                      lineNumbers: 'on',
+                      roundedSelection: false,
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                    }}
+                  />
+                </div>
                 
-                {/* Test Results */}
-                {testResults.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <strong className="text-sm">Test Results:</strong>
-                    {testResults.map((result, index) => (
-                      <div 
-                        key={index} 
-                        className={`p-3 rounded text-sm ${
-                          result.passed 
-                            ? 'bg-emerald-950/30 text-emerald-300 border border-emerald-700' 
-                            : 'bg-red-950/30 text-red-300 border border-red-700'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium">Test Case {result.testCase}</span>
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            result.passed ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
-                          }`}>
-                            {result.passed ? 'PASSED' : 'FAILED'}
-                          </span>
-                        </div>
-                        {!result.passed && (
-                          <div className="space-y-1 text-xs font-mono">
-                            <div><strong>Expected:</strong> {result.expected}</div>
-                            <div><strong>Actual:</strong> {result.actual || 'No output'}</div>
-                            {result.error && <div><strong>Error:</strong> {result.error}</div>}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                <div className="flex space-x-4 mt-4">
+                <div className="flex gap-2 mt-4">
                   <Button 
-                    variant="outline" 
-                    onClick={handleRun}
+                    onClick={handleRun} 
                     disabled={isSubmitting}
-                    className="transition-transform duration-200 hover:scale-105"
+                    variant="outline"
+                    className="flex-1"
                   >
-                    {isSubmitting ? "Running..." : "Run"}
+                    <Code className="h-4 w-4 mr-2" />
+                    {isSubmitting ? "Running..." : "Run Code"}
                   </Button>
                   <Button 
-                    onClick={handleSubmit}
+                    onClick={handleSubmit} 
                     disabled={isSubmitting}
-                    className="bg-success hover:bg-success/90 transition-transform duration-200 hover:scale-105"
+                    className="flex-1"
                   >
                     <Check className="h-4 w-4 mr-2" />
                     {isSubmitting ? "Submitting..." : "Submit"}
@@ -363,43 +345,81 @@ export default function ProblemDetail() {
               </CardContent>
             </Card>
 
-            {/* Discussion Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Discussion</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="solutions" className="w-full">
-                  <TabsList>
-                    <TabsTrigger value="solutions">Solutions</TabsTrigger>
-                    <TabsTrigger value="comments">Comments</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="solutions" className="mt-4">
-                    <div className="space-y-4">
-                      <div className="border rounded-lg p-4 bg-gray-50 dark:bg-card/80 transition-colors duration-300">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-sm text-gray-700 dark:text-card-foreground transition-colors duration-300">Hash Map Approach</span>
-                          <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="sm" className="transition-transform duration-200 hover:scale-110">
-                              <ArrowUp className="h-4 w-4 mr-1" />
-                              42
-                            </Button>
+            {/* Output */}
+            {(output || error || testResults.length > 0) && (
+              <Card className="bg-card">
+                <CardHeader>
+                  <CardTitle>Output</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {error && (
+                    <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <pre className="text-sm text-red-700 dark:text-red-300 whitespace-pre-wrap">
+                        {error}
+                      </pre>
+                    </div>
+                  )}
+                  
+                  {output && !error && (
+                    <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <pre className="text-sm text-green-700 dark:text-green-300 whitespace-pre-wrap">
+                        {output}
+                      </pre>
+                    </div>
+                  )}
+
+                  {testResults.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-gray-900 dark:text-primary">Test Results</h4>
+                      {testResults.map((result, index) => (
+                        <div 
+                          key={index}
+                          className={`p-3 rounded-lg border ${
+                            result.passed 
+                              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                              : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">
+                              Test Case {result.testCase}
+                            </span>
+                            <Badge variant={result.passed ? "default" : "destructive"}>
+                              {result.passed ? "PASSED" : "FAILED"}
+                            </Badge>
                           </div>
+                          
+                          {!result.passed && (
+                            <div className="space-y-2 text-sm">
+                              <div>
+                                <span className="font-medium">Expected: </span>
+                                <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                                  {result.expected}
+                                </code>
+                              </div>
+                              <div>
+                                <span className="font-medium">Actual: </span>
+                                <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                                  {result.actual || 'null'}
+                                </code>
+                              </div>
+                              {result.error && (
+                                <div>
+                                  <span className="font-medium">Error: </span>
+                                  <span className="text-red-600 dark:text-red-400">
+                                    {result.error}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-card-foreground transition-colors duration-300">
-                          Use a hash map to store numbers and their indices. For each number, check if target - number exists in the map.
-                        </p>
-                      </div>
+                      ))}
                     </div>
-                  </TabsContent>
-                  <TabsContent value="comments" className="mt-4">
-                    <div className="text-center py-8 text-gray-500 dark:text-muted-foreground transition-colors duration-300">
-                      <p>No comments yet. Be the first to discuss this problem!</p>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

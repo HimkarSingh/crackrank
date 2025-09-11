@@ -61,10 +61,129 @@ export const sampleProblems: Problem[] = [
       { input: "nums = [-1,-2,-3,-4,-5], target = -8", expectedOutput: "[2,4]", isHidden: true }
     ],
     starterCode: {
-      python: "def two_sum(nums, target):\n    # Write your solution here\n    pass\n\n# Test function\ndef solution(nums, target):\n    return two_sum(nums, target)",
-      javascript: "function twoSum(nums, target) {\n    // Write your solution here\n    return [];\n}\n\n// Test function\nfunction solution(nums, target) {\n    return twoSum(nums, target);\n}",
-      java: "import java.util.*;\n\npublic class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        // Write your solution here\n        return new int[0];\n    }\n    \n    public int[] solution(int[] nums, int target) {\n        return twoSum(nums, target);\n    }\n}",
-      cpp: "#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your solution here\n        return {};\n    }\n    \n    vector<int> solution(vector<int>& nums, int target) {\n        return twoSum(nums, target);\n    }\n};"
+      python: `import sys
+import json
+
+def two_sum(nums, target):
+    # Write your solution here
+    hash_map = {}
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in hash_map:
+            return [hash_map[complement], i]
+        hash_map[num] = i
+    return []
+
+# Auto-generated input handling
+if __name__ == "__main__":
+    lines = sys.stdin.read().strip().split('\\n')
+    nums = json.loads(lines[0])
+    target = int(lines[1])
+    result = two_sum(nums, target)
+    print(json.dumps(result))`,
+      javascript: `function twoSum(nums, target) {
+    // Write your solution here
+    const map = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (map.has(complement)) {
+            return [map.get(complement), i];
+        }
+        map.set(nums[i], i);
+    }
+    return [];
+}
+
+// Auto-generated input handling
+const readline = require('readline');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+let lines = [];
+rl.on('line', (line) => {
+    lines.push(line);
+});
+
+rl.on('close', () => {
+    const nums = JSON.parse(lines[0]);
+    const target = parseInt(lines[1]);
+    const result = twoSum(nums, target);
+    console.log(JSON.stringify(result));
+});`,
+      java: `import java.util.*;
+import java.io.*;
+
+public class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // Write your solution here
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (map.containsKey(complement)) {
+                return new int[]{map.get(complement), i};
+            }
+            map.put(nums[i], i);
+        }
+        return new int[0];
+    }
+    
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] numsStr = br.readLine().replace("[", "").replace("]", "").split(",");
+        int[] nums = Arrays.stream(numsStr).mapToInt(Integer::parseInt).toArray();
+        int target = Integer.parseInt(br.readLine());
+        
+        Solution solution = new Solution();
+        int[] result = solution.twoSum(nums, target);
+        System.out.println(Arrays.toString(result));
+    }
+}`,
+      cpp: `#include <vector>
+#include <unordered_map>
+#include <iostream>
+#include <sstream>
+using namespace std;
+
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        // Write your solution here
+        unordered_map<int, int> map;
+        for (int i = 0; i < nums.size(); i++) {
+            int complement = target - nums[i];
+            if (map.find(complement) != map.end()) {
+                return {map[complement], i};
+            }
+            map[nums[i]] = i;
+        }
+        return {};
+    }
+};
+
+int main() {
+    string line;
+    getline(cin, line);
+    
+    // Parse array
+    vector<int> nums;
+    line = line.substr(1, line.length() - 2); // remove [ ]
+    stringstream ss(line);
+    string num;
+    while (getline(ss, num, ',')) {
+        nums.push_back(stoi(num));
+    }
+    
+    int target;
+    cin >> target;
+    
+    Solution solution;
+    vector<int> result = solution.twoSum(nums, target);
+    cout << "[" << result[0] << "," << result[1] << "]" << endl;
+    
+    return 0;
+}`
     }
   },
   {
@@ -131,10 +250,132 @@ export const sampleProblems: Problem[] = [
           { input: 's = "(]"', expectedOutput: "false" }
         ],
         starterCode: {
-          python: "def is_valid(s):\n    # Write your solution here\n    pass",
-          javascript: "function isValid(s) {\n    // Write your solution here\n    return false;\n}",
-          java: "public class Solution {\n    public boolean isValid(String s) {\n        // Write your solution here\n        return false;\n    }\n}",
-          cpp: "#include <string>\nusing namespace std;\n\nclass Solution {\npublic:\n    bool isValid(string s) {\n        // Write your solution here\n        return false;\n    }\n};"
+          python: `import sys
+
+def is_valid(s):
+    # Write your solution here
+    stack = []
+    mapping = {')': '(', '}': '{', ']': '['}
+    
+    for char in s:
+        if char in mapping:
+            top = stack.pop() if stack else '#'
+            if mapping[char] != top:
+                return False
+        else:
+            stack.append(char)
+    
+    return not stack
+
+# Auto-generated input handling
+if __name__ == "__main__":
+    s = sys.stdin.read().strip().replace('"', '')
+    result = is_valid(s)
+    print(str(result).lower())`,
+          javascript: `function isValid(s) {
+    // Write your solution here
+    const stack = [];
+    const mapping = { ')': '(', '}': '{', ']': '[' };
+    
+    for (let char of s) {
+        if (char in mapping) {
+            const top = stack.length ? stack.pop() : '#';
+            if (mapping[char] !== top) {
+                return false;
+            }
+        } else {
+            stack.push(char);
+        }
+    }
+    
+    return stack.length === 0;
+}
+
+// Auto-generated input handling
+const readline = require('readline');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+rl.on('line', (line) => {
+    const s = line.replace(/"/g, '');
+    const result = isValid(s);
+    console.log(result);
+    rl.close();
+});`,
+          java: `import java.util.*;
+import java.io.*;
+
+public class Solution {
+    public boolean isValid(String s) {
+        // Write your solution here
+        Stack<Character> stack = new Stack<>();
+        Map<Character, Character> mapping = Map.of(')', '(', '}', '{', ']', '[');
+        
+        for (char c : s.toCharArray()) {
+            if (mapping.containsKey(c)) {
+                char top = stack.isEmpty() ? '#' : stack.pop();
+                if (mapping.get(c) != top) {
+                    return false;
+                }
+            } else {
+                stack.push(c);
+            }
+        }
+        
+        return stack.isEmpty();
+    }
+    
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String s = br.readLine().replace("\"", "");
+        
+        Solution solution = new Solution();
+        boolean result = solution.isValid(s);
+        System.out.println(result);
+    }
+}`,
+          cpp: `#include <string>
+#include <stack>
+#include <unordered_map>
+#include <iostream>
+using namespace std;
+
+class Solution {
+public:
+    bool isValid(string s) {
+        // Write your solution here
+        stack<char> stk;
+        unordered_map<char, char> mapping = {{')', '('}, {'}', '{'}, {']', '['}};
+        
+        for (char c : s) {
+            if (mapping.count(c)) {
+                char top = stk.empty() ? '#' : stk.top();
+                stk.pop();
+                if (mapping[c] != top) {
+                    return false;
+                }
+            } else {
+                stk.push(c);
+            }
+        }
+        
+        return stk.empty();
+    }
+};
+
+int main() {
+    string s;
+    getline(cin, s);
+    s.erase(remove(s.begin(), s.end(), '"'), s.end());
+    
+    Solution solution;
+    bool result = solution.isValid(s);
+    cout << (result ? "true" : "false") << endl;
+    
+    return 0;
+}`
         }
       },
       {

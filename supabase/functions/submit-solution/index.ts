@@ -59,8 +59,8 @@ serve(async (req) => {
     // Function to execute code with test case
     async function runTestCase(testCase: any, index: number) {
       try {
-        // Prepare input for the test case
-        const input = testCase.input.replace(/nums = /, '').replace(/, target = /, '\n');
+        // Use the input directly as it's already formatted
+        const input = testCase.input;
         
         // Submit to Judge0
         const submissionResponse = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=false', {
