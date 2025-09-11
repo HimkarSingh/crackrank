@@ -39,6 +39,21 @@ export default function ProblemDetail() {
     }
   };
 
+  const parseInput = (inputStr: string) => {
+    // Parse different input formats
+    if (inputStr.includes('nums = ') && inputStr.includes('target = ')) {
+      const nums = inputStr.match(/nums = (\[.*?\])/)?.[1] || '[]';
+      const target = inputStr.match(/target = (\d+)/)?.[1] || '0';
+      return `${nums}\n${target}`;
+    } else if (inputStr.includes('s = ')) {
+      const s = inputStr.match(/s = "(.*?)"/)?.[1] || '';
+      return s;
+    } else if (inputStr.includes('n = ')) {
+      const n = inputStr.match(/n = (\d+)/)?.[1] || '0';
+      return n;
+    }
+    return inputStr;
+  };
 
   if (!problem) {
     return (
