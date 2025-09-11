@@ -116,10 +116,7 @@ export default function ProblemDetail() {
   const handleSubmit = async () => {
     if (!problem) return;
     
-    setIsSubmitting(true);
-    setTestResults([]);
-    setOutput(null);
-    setError(null);
+
     
     try {
       // Transform test cases to proper format
