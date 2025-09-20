@@ -174,20 +174,20 @@ export default function ProblemDetail() {
 
   return (
     <div className="min-h-screen bg-secondary font-inter">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
         {/* Header */}
-        <div className="mb-6">
-          <Link to="/problems" className="inline-flex items-center text-primary hover:text-primary/80 mb-4">
+        <div className="mb-4 sm:mb-6">
+          <Link to="/problems" className="inline-flex items-center text-primary hover:text-primary/80 mb-3 sm:mb-4">
             <ChevronLeft className="h-4 w-4 mr-1" />
             Back to Problems
           </Link>
           
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-primary mb-2 transition-colors duration-300">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-primary mb-2 transition-colors duration-300">
                 #{problem.id}. {problem.title}
               </h1>
-              <div className="flex items-center space-x-4">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                 <Badge className={getDifficultyColor(problem.difficulty)}>
                   {problem.difficulty}
                 </Badge>
@@ -200,17 +200,17 @@ export default function ProblemDetail() {
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Problem Description */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <Card className="bg-card">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Code className="h-5 w-5 mr-2" />
+              <CardHeader className="pb-3 sm:pb-6">
+                <CardTitle className="flex items-center text-base sm:text-lg">
+                  <Code className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   Problem Description
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4 pt-0 sm:pt-0">
                 <div className="prose prose-sm max-w-none dark:prose-invert">
                   <p className="text-gray-700 dark:text-gray-200 whitespace-pre-line">
                     {problem.description}
@@ -218,27 +218,27 @@ export default function ProblemDetail() {
                 </div>
 
                 {/* Examples */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-primary">Examples</h3>
+                <div className="space-y-3 sm:space-y-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-primary">Examples</h3>
                   {problem.examples.map((example, index) => (
-                    <div key={index} className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                    <div key={index} className="bg-gray-50 dark:bg-gray-800 p-3 sm:p-4 rounded-lg">
                       <div className="space-y-2">
                         <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-200">Input: </span>
-                          <code className="text-sm bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                          <span className="font-medium text-gray-700 dark:text-gray-200 text-sm sm:text-base">Input: </span>
+                          <code className="text-xs sm:text-sm bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded break-all">
                             {example.input}
                           </code>
                         </div>
                         <div>
-                          <span className="font-medium text-gray-700 dark:text-gray-200">Output: </span>
-                          <code className="text-sm bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                          <span className="font-medium text-gray-700 dark:text-gray-200 text-sm sm:text-base">Output: </span>
+                          <code className="text-xs sm:text-sm bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded break-all">
                             {example.output}
                           </code>
                         </div>
                         {example.explanation && (
                           <div>
-                            <span className="font-medium text-gray-700 dark:text-gray-200">Explanation: </span>
-                            <span className="text-sm text-gray-600 dark:text-gray-300">
+                            <span className="font-medium text-gray-700 dark:text-gray-200 text-sm sm:text-base">Explanation: </span>
+                            <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                               {example.explanation}
                             </span>
                           </div>
@@ -250,20 +250,20 @@ export default function ProblemDetail() {
 
                 {/* Constraints */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-primary mb-2">Constraints</h3>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 dark:text-gray-300">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-primary mb-2">Constraints</h3>
+                  <ul className="list-disc list-inside space-y-1 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                     {problem.constraints.map((constraint, index) => (
-                      <li key={index}>{constraint}</li>
+                      <li key={index} className="leading-relaxed">{constraint}</li>
                     ))}
                   </ul>
                 </div>
 
                 {/* Topics */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-primary mb-2">Topics</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-primary mb-2">Topics</h3>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {problem.topics.map((topic, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
+                      <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
                         {topic}
                       </Badge>
                     ))}
@@ -272,10 +272,10 @@ export default function ProblemDetail() {
 
                 {/* Companies */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-primary mb-2">Companies</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-primary mb-2">Companies</h3>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {problem.companies.map((company, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
+                      <Badge key={index} variant="outline" className="text-xs px-2 py-1">
                         {company}
                       </Badge>
                     ))}
@@ -286,13 +286,13 @@ export default function ProblemDetail() {
           </div>
 
           {/* Code Editor and Results */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <Card className="bg-card">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Code Editor</CardTitle>
+              <CardHeader className="pb-3 sm:pb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+                  <CardTitle className="text-base sm:text-lg">Code Editor</CardTitle>
                   <Select value={language} onValueChange={handleLanguageChange}>
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-full sm:w-32">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -304,8 +304,8 @@ export default function ProblemDetail() {
                   </Select>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="h-96 border border-border rounded-lg overflow-hidden">
+              <CardContent className="pt-0">
+                <div className="h-64 sm:h-80 lg:h-96 border border-border rounded-lg overflow-hidden">
                   <MonacoEditor
                     height="100%"
                     language={language === 'cpp' ? 'cpp' : language}
@@ -314,31 +314,34 @@ export default function ProblemDetail() {
                     onChange={(value) => setCode(value || "")}
                     options={{
                       minimap: { enabled: false },
-                      fontSize: 14,
+                      fontSize: 12,
                       lineNumbers: 'on',
                       roundedSelection: false,
                       scrollBeyondLastLine: false,
                       automaticLayout: true,
+                      wordWrap: 'on',
                     }}
                   />
                 </div>
                 
-                <div className="flex gap-2 mt-4">
+                <div className="flex flex-col sm:flex-row gap-2 mt-3 sm:mt-4">
                   <Button 
                     onClick={handleRun} 
                     disabled={isSubmitting}
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 text-sm sm:text-base"
+                    size="sm"
                   >
-                    <Code className="h-4 w-4 mr-2" />
+                    <Code className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                     {isSubmitting ? "Running..." : "Run Code"}
                   </Button>
                   <Button 
                     onClick={handleSubmit} 
                     disabled={isSubmitting}
-                    className="flex-1"
+                    className="flex-1 text-sm sm:text-base"
+                    size="sm"
                   >
-                    <Check className="h-4 w-4 mr-2" />
+                    <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                     {isSubmitting ? "Submitting..." : "Submit"}
                   </Button>
                 </div>
@@ -348,65 +351,65 @@ export default function ProblemDetail() {
             {/* Output */}
             {(output || error || testResults.length > 0) && (
               <Card className="bg-card">
-                <CardHeader>
-                  <CardTitle>Output</CardTitle>
+                <CardHeader className="pb-3 sm:pb-6">
+                  <CardTitle className="text-base sm:text-lg">Output</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0">
                   {error && (
-                    <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                      <pre className="text-sm text-red-700 dark:text-red-300 whitespace-pre-wrap">
+                    <div className="p-2 sm:p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                      <pre className="text-xs sm:text-sm text-red-700 dark:text-red-300 whitespace-pre-wrap overflow-x-auto">
                         {error}
                       </pre>
                     </div>
                   )}
                   
                   {output && !error && (
-                    <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                      <pre className="text-sm text-green-700 dark:text-green-300 whitespace-pre-wrap">
+                    <div className="p-2 sm:p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                      <pre className="text-xs sm:text-sm text-green-700 dark:text-green-300 whitespace-pre-wrap overflow-x-auto">
                         {output}
                       </pre>
                     </div>
                   )}
 
                   {testResults.length > 0 && (
-                    <div className="space-y-3">
-                      <h4 className="font-semibold text-gray-900 dark:text-primary">Test Results</h4>
+                    <div className="space-y-2 sm:space-y-3">
+                      <h4 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-primary">Test Results</h4>
                       {testResults.map((result, index) => (
                         <div 
                           key={index}
-                          className={`p-3 rounded-lg border ${
+                          className={`p-2 sm:p-3 rounded-lg border ${
                             result.passed 
                               ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
                               : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                           }`}
                         >
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium">
+                            <span className="text-xs sm:text-sm font-medium">
                               Test Case {result.testCase}
                             </span>
-                            <Badge variant={result.passed ? "default" : "destructive"}>
+                            <Badge variant={result.passed ? "default" : "destructive"} className="text-xs px-2 py-1">
                               {result.passed ? "PASSED" : "FAILED"}
                             </Badge>
                           </div>
                           
                           {!result.passed && (
-                            <div className="space-y-2 text-sm">
-                              <div>
-                                <span className="font-medium">Expected: </span>
-                                <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                            <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                <span className="font-medium shrink-0">Expected: </span>
+                                <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs break-all">
                                   {result.expected}
                                 </code>
                               </div>
-                              <div>
-                                <span className="font-medium">Actual: </span>
-                                <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                <span className="font-medium shrink-0">Actual: </span>
+                                <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-xs break-all">
                                   {result.actual || 'null'}
                                 </code>
                               </div>
                               {result.error && (
-                                <div>
-                                  <span className="font-medium">Error: </span>
-                                  <span className="text-red-600 dark:text-red-400">
+                                <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-2">
+                                  <span className="font-medium shrink-0">Error: </span>
+                                  <span className="text-red-600 dark:text-red-400 text-xs break-words">
                                     {result.error}
                                   </span>
                                 </div>
