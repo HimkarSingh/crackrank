@@ -1,6 +1,6 @@
 # CrackRank - Coding Interview Preparation Platform
 
-![CrackRank Banner](https://via.placeholder.com/1200x400/1E3A8A/FFFFFF?text=CrackRank)  
+![CrackRank Banner](crackrankbanner.jpeg)  
 *A LeetCode-style platform to ace technical interviews with curated DSA problems, progress tracking, and community support.*
 
 ## 🚀 Features
