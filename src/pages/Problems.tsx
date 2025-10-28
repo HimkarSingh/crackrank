@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,24 +9,64 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Filter, X, CheckCircle, Circle, LogIn, Target } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { sampleProblems, topics, companies } from "@/data/problems";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Problems() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDifficulty, setSelectedDifficulty] = useState("all");
   const [selectedTopic, setSelectedTopic] = useState("all");
+  const [problems, setProblems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [topics, setTopics] = useState<string[]>([]);
 
-  // Use actual problems data from sampleProblems
-  const problems = sampleProblems.map(problem => ({
-    id: problem.id,
-    title: problem.title,
-    difficulty: problem.difficulty,
-    topic: problem.topics[0], // Use first topic as primary
-    acceptanceRate: problem.acceptance_rate,
-    solved: problem.solved || false
-  }));
+  // Fetch problems from database
+  useEffect(() => {
+    const fetchProblems = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('problems')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        const formattedProblems = (data || []).map(p => ({
+          id: p.id,
+          title: p.title,
+          difficulty: p.difficulty,
+          topic: (p.topics as string[])?.[0] || p.topic || 'General',
+          acceptanceRate: p.acceptance_rate || 0,
+          solved: p.is_solved || false,
+          topics: (p.topics as string[]) || []
+        }));
+        
+        setProblems(formattedProblems);
+        
+        // Extract unique topics
+        const allTopics = new Set<string>();
+        formattedProblems.forEach(p => {
+          p.topics.forEach((t: string) => allTopics.add(t));
+          if (p.topic) allTopics.add(p.topic);
+        });
+        setTopics(Array.from(allTopics).sort());
+      } catch (err) {
+        console.error('Error fetching problems:', err);
+        toast({
+          title: "Error",
+          description: "Failed to load problems",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProblems();
+  }, [toast]);
 
   const filteredProblems = useMemo(() => {
     return problems.filter(problem => {
@@ -53,6 +93,17 @@ export default function Problems() {
     setSelectedDifficulty("all");
     setSelectedTopic("all");
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading problems...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-inter">

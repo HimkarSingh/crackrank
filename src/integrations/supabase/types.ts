@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -97,35 +97,56 @@ export type Database = {
       problems: {
         Row: {
           acceptance_rate: number | null
+          companies: string[] | null
+          constraints: string[] | null
           created_at: string
           description: string
           difficulty: string
+          examples: Json | null
+          function_signature: string | null
           id: string
           is_solved: boolean | null
+          starter_code: Json | null
+          test_cases: Json | null
           title: string
           topic: string
+          topics: string[] | null
           updated_at: string
         }
         Insert: {
           acceptance_rate?: number | null
+          companies?: string[] | null
+          constraints?: string[] | null
           created_at?: string
           description: string
           difficulty: string
+          examples?: Json | null
+          function_signature?: string | null
           id?: string
           is_solved?: boolean | null
+          starter_code?: Json | null
+          test_cases?: Json | null
           title: string
           topic: string
+          topics?: string[] | null
           updated_at?: string
         }
         Update: {
           acceptance_rate?: number | null
+          companies?: string[] | null
+          constraints?: string[] | null
           created_at?: string
           description?: string
           difficulty?: string
+          examples?: Json | null
+          function_signature?: string | null
           id?: string
           is_solved?: boolean | null
+          starter_code?: Json | null
+          test_cases?: Json | null
           title?: string
           topic?: string
+          topics?: string[] | null
           updated_at?: string
         }
         Relationships: []
@@ -238,15 +259,12 @@ export type Database = {
     Functions: {
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"

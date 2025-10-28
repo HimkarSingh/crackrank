@@ -21,21 +21,59 @@ export default function ProblemDetail() {
   const [output, setOutput] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [testResults, setTestResults] = useState<any[]>([]);
+  const [problem, setProblem] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const problem = sampleProblems.find(p => p.id === parseInt(id || '0'));
+  // Fetch problem from database
+  useEffect(() => {
+    const fetchProblem = async () => {
+      if (!id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('problems')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) throw error;
+        
+        setProblem({
+          ...data,
+          examples: (data.examples as any[]) || [],
+          constraints: (data.constraints as string[]) || [],
+          starter_code: (data.starter_code as any) || {},
+          test_cases: (data.test_cases as any[]) || [],
+          companies: (data.companies as string[]) || [],
+          topics: (data.topics as string[]) || []
+        });
+      } catch (err) {
+        console.error('Error fetching problem:', err);
+        toast({
+          title: "Error",
+          description: "Failed to load problem",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProblem();
+  }, [id, toast]);
 
   // Initialize code with starter code when problem loads
   useEffect(() => {
-    if (problem?.starterCode) {
-      setCode(problem.starterCode[language as keyof typeof problem.starterCode] || "");
+    if (problem?.starter_code) {
+      setCode(problem.starter_code[language as keyof typeof problem.starter_code] || "");
     }
   }, [problem, language]);
 
   // Update code when language changes
   const handleLanguageChange = (newLang: string) => {
     setLanguage(newLang);
-    if (problem?.starterCode) {
-      setCode(problem.starterCode[newLang as keyof typeof problem.starterCode] || "");
+    if (problem?.starter_code) {
+      setCode(problem.starter_code[newLang as keyof typeof problem.starter_code] || "");
     }
   };
 
@@ -54,6 +92,17 @@ export default function ProblemDetail() {
     }
     return inputStr;
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-secondary font-inter flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading problem...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!problem) {
     return (
@@ -185,7 +234,7 @@ export default function ProblemDetail() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-primary mb-2 transition-colors duration-300">
-                #{problem.id}. {problem.title}
+                {problem.title}
               </h1>
               <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                 <Badge className={getDifficultyColor(problem.difficulty)}>
@@ -259,28 +308,32 @@ export default function ProblemDetail() {
                 </div>
 
                 {/* Topics */}
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-primary mb-2">Topics</h3>
-                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {problem.topics.map((topic, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
-                        {topic}
-                      </Badge>
-                    ))}
+                {problem.topics && problem.topics.length > 0 && (
+                  <div>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-primary mb-2">Topics</h3>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {problem.topics.map((topic: string, index: number) => (
+                        <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
+                          {topic}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Companies */}
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-primary mb-2">Companies</h3>
-                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {problem.companies.map((company, index) => (
-                      <Badge key={index} variant="outline" className="text-xs px-2 py-1">
-                        {company}
-                      </Badge>
-                    ))}
+                {problem.companies && problem.companies.length > 0 && (
+                  <div>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-primary mb-2">Companies</h3>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {problem.companies.map((company: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs px-2 py-1">
+                          {company}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -22,6 +22,13 @@ interface Problem {
   acceptance_rate: number;
   is_solved: boolean;
   created_at: string;
+  examples?: any[];
+  constraints?: string[];
+  starter_code?: any;
+  test_cases?: any[];
+  function_signature?: string;
+  companies?: string[];
+  topics?: string[];
 }
 
 interface UserProfile {
@@ -66,7 +73,26 @@ export default function Admin() {
     difficulty: 'Easy',
     topic: '',
     acceptance_rate: 0,
+    examples: [] as any[],
+    constraints: [] as string[],
+    starter_code: {
+      python: '',
+      javascript: '',
+      java: '',
+      cpp: ''
+    },
+    test_cases: [] as any[],
+    function_signature: '',
+    companies: [] as string[],
+    topics: [] as string[]
   });
+
+  // Temp state for adding examples/test cases
+  const [currentExample, setCurrentExample] = useState({ input: '', output: '', explanation: '' });
+  const [currentTestCase, setCurrentTestCase] = useState({ input: '', expected: '' });
+  const [currentConstraint, setCurrentConstraint] = useState('');
+  const [currentCompany, setCurrentCompany] = useState('');
+  const [currentTopic, setCurrentTopic] = useState('');
 
   useEffect(() => {
     fetchProblems();
@@ -81,7 +107,15 @@ export default function Admin() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProblems(data || []);
+      setProblems((data || []).map(p => ({
+        ...p,
+        examples: (p.examples as any[]) || [],
+        constraints: p.constraints || [],
+        starter_code: (p.starter_code as any) || {},
+        test_cases: (p.test_cases as any[]) || [],
+        companies: p.companies || [],
+        topics: p.topics || []
+      })));
     } catch (error) {
       console.error('Error fetching problems:', error);
       toast({
@@ -165,6 +199,13 @@ export default function Admin() {
         difficulty: 'Easy',
         topic: '',
         acceptance_rate: 0,
+        examples: [],
+        constraints: [],
+        starter_code: { python: '', javascript: '', java: '', cpp: '' },
+        test_cases: [],
+        function_signature: '',
+        companies: [],
+        topics: []
       });
       fetchProblems();
     } catch (error) {
@@ -185,6 +226,13 @@ export default function Admin() {
       difficulty: problem.difficulty,
       topic: problem.topic,
       acceptance_rate: problem.acceptance_rate,
+      examples: problem.examples || [],
+      constraints: problem.constraints || [],
+      starter_code: problem.starter_code || { python: '', javascript: '', java: '', cpp: '' },
+      test_cases: problem.test_cases || [],
+      function_signature: problem.function_signature || '',
+      companies: problem.companies || [],
+      topics: problem.topics || []
     });
     setIsDialogOpen(true);
   };
@@ -330,75 +378,301 @@ export default function Admin() {
                     difficulty: 'Easy',
                     topic: '',
                     acceptance_rate: 0,
+                    examples: [],
+                    constraints: [],
+                    starter_code: { python: '', javascript: '', java: '', cpp: '' },
+                    test_cases: [],
+                    function_signature: '',
+                    companies: [],
+                    topics: []
                   });
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Problem
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl">
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingProblem ? 'Edit Problem' : 'Add New Problem'}
                   </DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Title</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      rows={4}
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Basic Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Basic Information</h3>
                     <div>
-                      <Label htmlFor="difficulty">Difficulty</Label>
-                      <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Easy">Easy</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="Hard">Hard</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="topic">Topic</Label>
+                      <Label htmlFor="title">Problem Title *</Label>
                       <Input
-                        id="topic"
-                        value={formData.topic}
-                        onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        placeholder="e.g., Two Sum"
                         required
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="description">Full Description *</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        rows={6}
+                        placeholder="Provide detailed problem description..."
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="difficulty">Difficulty *</Label>
+                        <Select value={formData.difficulty} onValueChange={(value) => setFormData({ ...formData, difficulty: value })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Easy">Easy</SelectItem>
+                            <SelectItem value="Medium">Medium</SelectItem>
+                            <SelectItem value="Hard">Hard</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="acceptance_rate">Acceptance Rate (%)</Label>
+                        <Input
+                          id="acceptance_rate"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={formData.acceptance_rate}
+                          onChange={(e) => setFormData({ ...formData, acceptance_rate: parseFloat(e.target.value) || 0 })}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="function_signature">Function Signature</Label>
+                      <Input
+                        id="function_signature"
+                        value={formData.function_signature}
+                        onChange={(e) => setFormData({ ...formData, function_signature: e.target.value })}
+                        placeholder="e.g., def twoSum(nums: List[int], target: int) -> List[int]:"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="acceptance_rate">Acceptance Rate (%)</Label>
-                    <Input
-                      id="acceptance_rate"
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      value={formData.acceptance_rate}
-                      onChange={(e) => setFormData({ ...formData, acceptance_rate: parseFloat(e.target.value) || 0 })}
-                    />
+
+                  {/* Examples */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Examples</h3>
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-3 gap-2">
+                        <Input
+                          placeholder="Input (e.g., nums = [2,7,11,15], target = 9)"
+                          value={currentExample.input}
+                          onChange={(e) => setCurrentExample({ ...currentExample, input: e.target.value })}
+                        />
+                        <Input
+                          placeholder="Output (e.g., [0,1])"
+                          value={currentExample.output}
+                          onChange={(e) => setCurrentExample({ ...currentExample, output: e.target.value })}
+                        />
+                        <Input
+                          placeholder="Explanation (optional)"
+                          value={currentExample.explanation}
+                          onChange={(e) => setCurrentExample({ ...currentExample, explanation: e.target.value })}
+                        />
+                      </div>
+                      <Button type="button" size="sm" onClick={() => {
+                        if (currentExample.input && currentExample.output) {
+                          setFormData({ ...formData, examples: [...formData.examples, currentExample] });
+                          setCurrentExample({ input: '', output: '', explanation: '' });
+                        }
+                      }}>Add Example</Button>
+                    </div>
+                    <div className="space-y-2">
+                      {formData.examples.map((ex, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 bg-muted rounded">
+                          <div className="text-sm">
+                            <div><strong>Input:</strong> {ex.input}</div>
+                            <div><strong>Output:</strong> {ex.output}</div>
+                            {ex.explanation && <div><strong>Explanation:</strong> {ex.explanation}</div>}
+                          </div>
+                          <Button type="button" size="sm" variant="destructive" onClick={() => {
+                            setFormData({ ...formData, examples: formData.examples.filter((_, i) => i !== idx) });
+                          }}>Remove</Button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex justify-end space-x-2">
+
+                  {/* Test Cases */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Test Cases (Hidden)</h3>
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Input"
+                          value={currentTestCase.input}
+                          onChange={(e) => setCurrentTestCase({ ...currentTestCase, input: e.target.value })}
+                        />
+                        <Input
+                          placeholder="Expected Output"
+                          value={currentTestCase.expected}
+                          onChange={(e) => setCurrentTestCase({ ...currentTestCase, expected: e.target.value })}
+                        />
+                      </div>
+                      <Button type="button" size="sm" onClick={() => {
+                        if (currentTestCase.input && currentTestCase.expected) {
+                          setFormData({ ...formData, test_cases: [...formData.test_cases, currentTestCase] });
+                          setCurrentTestCase({ input: '', expected: '' });
+                        }
+                      }}>Add Test Case</Button>
+                    </div>
+                    <div className="space-y-2">
+                      {formData.test_cases.map((tc, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 bg-muted rounded">
+                          <div className="text-sm">
+                            <strong>Input:</strong> {tc.input} → <strong>Expected:</strong> {tc.expected}
+                          </div>
+                          <Button type="button" size="sm" variant="destructive" onClick={() => {
+                            setFormData({ ...formData, test_cases: formData.test_cases.filter((_, i) => i !== idx) });
+                          }}>Remove</Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Constraints */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Constraints</h3>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add constraint (e.g., 1 <= nums.length <= 10^4)"
+                          value={currentConstraint}
+                          onChange={(e) => setCurrentConstraint(e.target.value)}
+                        />
+                        <Button type="button" size="sm" onClick={() => {
+                          if (currentConstraint) {
+                            setFormData({ ...formData, constraints: [...formData.constraints, currentConstraint] });
+                            setCurrentConstraint('');
+                          }
+                        }}>Add</Button>
+                      </div>
+                      <div className="space-y-1">
+                        {formData.constraints.map((c, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-2 bg-muted rounded text-sm">
+                            <span>{c}</span>
+                            <Button type="button" size="sm" variant="destructive" onClick={() => {
+                              setFormData({ ...formData, constraints: formData.constraints.filter((_, i) => i !== idx) });
+                            }}>Remove</Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Starter Code */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Starter Code (Optional - AI can generate)</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Python</Label>
+                        <Textarea
+                          value={formData.starter_code.python}
+                          onChange={(e) => setFormData({ ...formData, starter_code: { ...formData.starter_code, python: e.target.value } })}
+                          rows={3}
+                          placeholder="def solution(...):"
+                        />
+                      </div>
+                      <div>
+                        <Label>JavaScript</Label>
+                        <Textarea
+                          value={formData.starter_code.javascript}
+                          onChange={(e) => setFormData({ ...formData, starter_code: { ...formData.starter_code, javascript: e.target.value } })}
+                          rows={3}
+                          placeholder="function solution(...) {"
+                        />
+                      </div>
+                      <div>
+                        <Label>Java</Label>
+                        <Textarea
+                          value={formData.starter_code.java}
+                          onChange={(e) => setFormData({ ...formData, starter_code: { ...formData.starter_code, java: e.target.value } })}
+                          rows={3}
+                          placeholder="class Solution {"
+                        />
+                      </div>
+                      <div>
+                        <Label>C++</Label>
+                        <Textarea
+                          value={formData.starter_code.cpp}
+                          onChange={(e) => setFormData({ ...formData, starter_code: { ...formData.starter_code, cpp: e.target.value } })}
+                          rows={3}
+                          placeholder="class Solution {"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Topics/Tags */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Topics / Tags</h3>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add topic (e.g., Array, HashMap, Two Pointers)"
+                          value={currentTopic}
+                          onChange={(e) => setCurrentTopic(e.target.value)}
+                        />
+                        <Button type="button" size="sm" onClick={() => {
+                          if (currentTopic) {
+                            setFormData({ ...formData, topics: [...formData.topics, currentTopic] });
+                            setCurrentTopic('');
+                          }
+                        }}>Add</Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.topics.map((t, idx) => (
+                          <Badge key={idx} variant="secondary" className="cursor-pointer" onClick={() => {
+                            setFormData({ ...formData, topics: formData.topics.filter((_, i) => i !== idx) });
+                          }}>
+                            {t} ✕
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Companies */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Companies</h3>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add company (e.g., Google, Amazon, Microsoft)"
+                          value={currentCompany}
+                          onChange={(e) => setCurrentCompany(e.target.value)}
+                        />
+                        <Button type="button" size="sm" onClick={() => {
+                          if (currentCompany) {
+                            setFormData({ ...formData, companies: [...formData.companies, currentCompany] });
+                            setCurrentCompany('');
+                          }
+                        }}>Add</Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {formData.companies.map((c, idx) => (
+                          <Badge key={idx} variant="outline" className="cursor-pointer" onClick={() => {
+                            setFormData({ ...formData, companies: formData.companies.filter((_, i) => i !== idx) });
+                          }}>
+                            {c} ✕
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-2 pt-4 border-t">
                     <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                       Cancel
                     </Button>
